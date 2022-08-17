@@ -5,6 +5,10 @@
         <RootNamespace>Structures.NetSixZero</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
+        <PackageId>NuGet.Structures-NetSixZero</PackageId>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/Gr8-Tools/Structures</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
