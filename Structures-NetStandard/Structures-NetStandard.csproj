@@ -6,6 +6,10 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Structures.NetStandard</RootNamespace>
         <LangVersion>8</LangVersion>
+        
+        <PackageId>NuGet.Structures-NetStandard</PackageId>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/Gr8-Tools/Structures</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
