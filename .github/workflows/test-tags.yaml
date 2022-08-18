@@ -1,0 +1,24 @@
+name: test-tags
+
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
+    - "Structures-(NetSixZero|NetStandard)"
+jobs:
+  test_tags:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Set VERSION variable from tag
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+      - name: set WORK_DIR variable from tag
+        run: echo "WORK_DIR=${GITHUB_REF/refs\/tags\/Structures-/}" >> $GITHUB_ENV
+      - name: Test Variables
+        run: |
+          echo $VERSION
+          echo $WORK_DIR
