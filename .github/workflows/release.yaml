@@ -7,7 +7,7 @@ on:
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 6
     
     steps:
     - name: Checkout
@@ -35,21 +35,15 @@ jobs:
       run: |
         echo "LIB_TYPE=NetStandard" >> $GITHUB_ENV
         echo "VERSION=${GITHUB_REF/refs\/tags\/NetStandard_v/}" >> $GITHUB_ENV
-          
-    - name: Check ENVS
-      run: |
-        echo ${LIB_TYPE}
-        echo ${VERSION}
-          
+               
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
+    - name: Test
+      run: dotnet test Structures-${LIB_TYPE} --no-build --configuration Release --verbosity normal
     - name: Pack
       run: dotnet pack Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-build --output .
-    - name: TEST PACKED
-      run: |
-        ls -l ./Structures-${LIB_TYPE}/bin/Release/
     - name: Push
       run: dotnet nuget push ./NuGet.Structures-${LIB_TYPE}.${VERSION}.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
       
