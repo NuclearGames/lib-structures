@@ -16,12 +16,13 @@ jobs:
       - name: Set VERSION variable from tag
         run: echo "VERSION=${GITHUB_REF/refs\/tags\/Net[A-Za-z]+_v/}" >> $GITHUB_ENV
         
+        # SET WORK_DIR
       - name: Try set WORK_DIR='NetSixZero' from tag
         run: echo "WORK_DIR=NetSixZero" >> $GITHUB_ENV
-        if: startsWith(GITHUB_REF, 'refs/tags/Structures-NetSixZero')
+        if: startsWith(github.ref, 'refs/tags/Structures-NetSixZero')
       - name: Try set WORK_DIR='NetStandard' from tag
         run: echo "WORK_DIR=NetStandard" >> $GITHUB_ENV
-        if: startsWith(GITHUB_REF, 'refs/tags/Structures-NetStandard')
+        if: startsWith(github.ref, 'refs/tags/Structures-NetStandard')
         
       - name: Test Variables
         run: |
