@@ -1,11 +1,9 @@
-name: auto-build
+name: AUTO Build TAGGED
 
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+.[0-9]+"
-    - "Structures-(NetSixZero|NetStandard)"
-    - "lock"
+    - "Net[A-Za-z]+_v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
@@ -14,28 +12,41 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
     - name: Verify commit exists in origin/main
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
         git branch --remote --contains | grep origin/main
-    - name: Set VERSION variable from tag
-      run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-    - name: set WORK_DIR variable from tag
-      run: echo "WORK_DIR=${GITHUB_REF/refs\/tags\/Structures-/}" >> $GITHUB_ENV
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+      if: ${{ success() }}
+      
+    # SET NET6 variables
+    - name: Try set LIB_TYPE='NetSixZero' from tag
+      if: startsWith(github.ref, 'refs/tags/NetSixZero')
+      run: |
+        echo "LIB_TYPE=NetSixZero" >> $GITHUB_ENV
+        echo "VERSION=${GITHUB_REF/refs\/tags\/NetSixZero_v/}" >> $GITHUB_ENV
+        
+    # SET NetStandard variabled
+    - name: Try set LIB_TYPE='NetStandard' from tag
+      if: startsWith(github.ref, 'refs/tags/NetStandard')
+      run: |
+        echo "LIB_TYPE=NetStandard" >> $GITHUB_ENV
+        echo "VERSION=${GITHUB_REF/refs\/tags\/NetStandard_v/}" >> $GITHUB_ENV
+          
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
-    - name: Test
-      run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
+      run: dotnet build Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
     - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
+      run: dotnet pack Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-build --output .
+    - name: TEST PACKED
+      run: |
+        ls -l ./Structures-${LIB_TYPE}/bin/Release/
     - name: Push
-      run: dotnet nuget push NuGet.${WORK_DIR}.${VERSION}.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push Structures-${LIB_TYPE}/bin/Release/*${LIB_TYPE}*.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
       
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
