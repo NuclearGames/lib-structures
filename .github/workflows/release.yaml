@@ -36,6 +36,11 @@ jobs:
         echo "LIB_TYPE=NetStandard" >> $GITHUB_ENV
         echo "VERSION=${GITHUB_REF/refs\/tags\/NetStandard_v/}" >> $GITHUB_ENV
           
+    - name: Check ENVS
+      run: |
+        echo ${LIB_TYPE}
+        echo ${VERSION}
+          
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -46,7 +51,7 @@ jobs:
       run: |
         ls -l ./Structures-${LIB_TYPE}/bin/Release/
     - name: Push
-      run: dotnet nuget push Structures-${LIB_TYPE}/bin/Release/*${LIB_TYPE}*.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push Structures-${LIB_TYPE}/bin/Release/NuGet.Structures-${LIB_TYPE}.${VERSION}.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
       
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
