@@ -36,6 +36,11 @@ jobs:
         echo "LIB_TYPE=NetStandard" >> $GITHUB_ENV
         echo "VERSION=${GITHUB_REF/refs\/tags\/NetStandard_v/}" >> $GITHUB_ENV
           
+    - name: Check ENVS
+      run: |
+        echo ${LIB_TYPE}
+        echo ${VERSION}
+          
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
