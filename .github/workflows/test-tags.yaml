@@ -3,8 +3,8 @@ name: test-tags
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+.[0-9]+"
-    - "Structures-(NetSixZero|NetStandard)"
+    - "Structures-(NetSixZero|NetStandard)\/v[0-9]+.[0-9]+.[0-9]+"
+    #- "Structures-(NetSixZero|NetStandard)"
 jobs:
   test_tags:
     runs-on: ubuntu-latest
@@ -15,9 +15,15 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Set VERSION variable from tag
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-      - name: set WORK_DIR variable from tag
-        run: echo "WORK_DIR=${GITHUB_REF/refs\/tags\/Structures-/}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/Structures-(NetSixZero|NetStandard)\/v/}" >> $GITHUB_ENV
+        
+      - name: Try set WORK_DIR='NetSixZero' from tag
+        run: echo "WORK_DIR=NetSixZero" >> $GITHUB_ENV
+        if: startsWith(GITHUB_REF, 'refs/tags/Structures-NetSixZero')
+      - name: Try set WORK_DIR='NetStandard' from tag
+        run: echo "WORK_DIR=NetStandard" >> $GITHUB_ENV
+        if: startsWith(GITHUB_REF, 'refs/tags/Structures-NetStandard')
+        
       - name: Test Variables
         run: |
           echo $VERSION
