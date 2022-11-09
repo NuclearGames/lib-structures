@@ -45,7 +45,7 @@ jobs:
     - name: Pack
       run: dotnet pack Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Push
-      run: dotnet nuget push ./NuGet.Structures-${LIB_TYPE}.${VERSION}.nupkg --source https://nuget.pkg.github.com/Gr8-Tools/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push ./NuGet.Structures-${LIB_TYPE}.${VERSION}.nupkg --source https://nuget.pkg.github.com/NuclearGames/index.json --api-key ${GITHUB_TOKEN}
       
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
