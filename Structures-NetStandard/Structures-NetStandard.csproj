@@ -9,7 +9,7 @@
         
         <PackageId>NuGet.Structures-NetStandard</PackageId>
         <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/Gr8-Tools/Structures</RepositoryUrl>
+        <RepositoryUrl>https://github.com/NuclearGames/Structures</RepositoryUrl>
     </PropertyGroup>
 
 </Project>
