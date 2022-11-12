@@ -1,0 +1,19 @@
+{
+  "name": "com.anlsd.structures-unity",
+  "displayName": "Structures-Unity",
+  "author": {
+    "name": "Gr8-Tools"
+  },
+  "version": "0.0.1",
+  "unity": "2020.3",
+  "description": "Provide extended structures, that used in different projects",
+  "keywords": [
+    "structures",
+    "unity"
+  ],
+  "unityRelease": "0f1",
+  "dependencies": {
+    "com.cysharp.unitask": "2.3.1"
+  },
+  "type": "library"
+}
