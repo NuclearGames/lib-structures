@@ -1,6 +1,6 @@
 {
     "name": "anlsd.structures-unity",
-    "rootNamespace": "NuclearGames.StructruesUnity",
+    "rootNamespace": "NuclearGames.StructuresUnity",
     "references": [
         "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
