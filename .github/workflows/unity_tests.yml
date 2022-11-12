@@ -1,0 +1,22 @@
+name: Unity Tests
+
+on:
+  push:
+    branches: [ "main_unity" ]
+  pull_request:
+    branches: [ "main_unity" ]
+
+jobs:
+  tests:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: Tests
+      uses: game-ci/unity-test-runner@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        projectPath: path/to/your/project
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
