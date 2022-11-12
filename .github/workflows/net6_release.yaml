@@ -3,7 +3,7 @@ name: AUTO Build TAGGED
 on:
   push:
     tags:
-    - "Net[A-Za-z]+_v[0-9]+.[0-9]+.[0-9]+"
+    - "Net6_v[0-9]+.[0-9]+.[0-9]+"
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
@@ -23,18 +23,11 @@ jobs:
       if: ${{ success() }}
       
     # SET NET6 variables
-    - name: Try set LIB_TYPE='NetSixZero' from tag
-      if: startsWith(github.ref, 'refs/tags/NetSixZero')
+    - name: Try set LIB_TYPE='Net6' from tag
+      if: startsWith(github.ref, 'refs/tags/Net6')
       run: |
         echo "LIB_TYPE=NetSixZero" >> $GITHUB_ENV
-        echo "VERSION=${GITHUB_REF/refs\/tags\/NetSixZero_v/}" >> $GITHUB_ENV
-        
-    # SET NetStandard variabled
-    - name: Try set LIB_TYPE='NetStandard' from tag
-      if: startsWith(github.ref, 'refs/tags/NetStandard')
-      run: |
-        echo "LIB_TYPE=NetStandard" >> $GITHUB_ENV
-        echo "VERSION=${GITHUB_REF/refs\/tags\/NetStandard_v/}" >> $GITHUB_ENV
+        echo "VERSION=${GITHUB_REF/refs\/tags\/Net6_v/}" >> $GITHUB_ENV
                
     - name: Restore dependencies
       run: dotnet restore

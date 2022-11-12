@@ -1,0 +1,25 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main_unity
+    
+jobs:
+  upm-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Create Release for OpenUPM
+      # if: ${{ success() }}
+      id: create_release
+      uses: quabug/create-upm-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        target: main_unity
+        upm_tag_prefix: Unity_v
+        upm_package_path: Unity/Structrues-Unity/Packages/Structures-Unity
+        create_unitypackage: true
+        unitypackage_name: Structures-Unity
