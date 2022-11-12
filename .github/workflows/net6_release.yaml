@@ -1,4 +1,4 @@
-name: AUTO Build TAGGED
+name: Net6 Release
 
 on:
   push:
