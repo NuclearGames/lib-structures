@@ -1,4 +1,4 @@
-name: tests checkout
+name: Net6 Tests
 
 on:
   push:
