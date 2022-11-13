@@ -2,7 +2,7 @@
 using NuclearGames.StructuresUnity.Utils.Collections;
 using NUnit.Framework;
 
-namespace NuclearGames.StructuresUnity.Tests.Runtime.Utils.Collections {
+namespace Tests.Editor.Utils.Collections {
     public class AnyElementListUnitTests {
         private readonly int[] _dataCollection = new[] {
             9, 4, 17, 3, 6, 22, 5 ,7, 20

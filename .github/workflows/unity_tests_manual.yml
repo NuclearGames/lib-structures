@@ -20,9 +20,11 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: Unity/Structrues-Unity/Library
-          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          # key: Library-${{ hashFiles('Unity/Structrues-Unity/Assets/**', 'Unity/Structrues-Unity/Packages/**', 'Unity/Structrues-Unity/ProjectSettings/**') }}
+          # key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/Assets/**/*.cs', 'Unity/Structrues-Unity/ProjectSettings/*.asset', 'Unity/Structrues-Unity/Packages/**/*.cs', 'Unity/Structrues-Unity/Packages/**/*.json') }}
+          key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/**/*.cs') }}
           restore-keys: |
-            Library-
+            Library-${{ runner.os }}-
           
       # Project Tests
       - name: Project Tests
