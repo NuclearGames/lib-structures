@@ -1,20 +1,20 @@
-name: Rebase to main_unity
+# name: Rebase to main_unity
 
-on:
-  push:
-    branches:
-      - main
+# on:
+  # push:
+    # branches:
+      # - main
       
-jobs:
-  sync-branch:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
+# jobs:
+  # sync-branch:
+    # runs-on: ubuntu-latest
+    # steps:
+      # - uses: actions/checkout@master
         
-      - name: Merge main -> main_unity
-        uses: devmasx/merge-branch@master
-        with:
-          type: now
-          target_branch: main_unity
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          message: 'Auto merge by git hub actions'
+      # - name: Merge main -> main_unity
+        # uses: devmasx/merge-branch@master
+        # with:
+          # type: now
+          # target_branch: main_unity
+          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          # message: 'Auto merge by git hub actions'
