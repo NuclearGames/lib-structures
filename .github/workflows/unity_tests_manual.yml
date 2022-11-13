@@ -1,0 +1,27 @@
+name: Unity Tests
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  tests:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: Project Tests
+      uses: game-ci/unity-test-runner@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        projectPath: Unity/Structrues-Unity
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
+    - name: Package Tests
+      uses: game-ci/unity-test-runner@v2
+      env:
+        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      with:
+        projectPath: '*/Unity/Structrues-Unity/Packages/Structures-Unity'
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
+    
