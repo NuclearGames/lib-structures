@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace NuclearGames.StructuresUnity.Utils.Generators.Interfaces {
     public interface IIdGenerator<T> where T : IComparable<T> {
