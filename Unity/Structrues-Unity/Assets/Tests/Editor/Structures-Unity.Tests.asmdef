@@ -1,10 +1,10 @@
 {
-    "name": "anlsd.structures-unity.tests",
-    "rootNamespace": "",
+    "name": "Structures-Unity.Tests",
+    "rootNamespace": "NuclearGames.StructuresUnity",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "anlsd.structures-unity",
+        "Structures-Unity",
         "UniTask"
     ],
     "includePlatforms": [
