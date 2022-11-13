@@ -2,7 +2,7 @@ using System;
 using NuclearGames.StructuresUnity.Structures.Collections;
 using NUnit.Framework;
 
-namespace NuclearGames.StructuresUnity.Tests.Runtime.Structures.Collections {
+namespace Tests.Editor.Structures.Collections {
     public class BinaryHeapUnitTests {
 
         [TestCase(10)]
