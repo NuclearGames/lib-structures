@@ -1,6 +1,6 @@
 {
-    "name": "anlsd.structures-unity.Tests",
-    "rootNamespace": "NuclearGames.StructuresUnity",
+    "name": "anlsd.structures-unity.tests",
+    "rootNamespace": "",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
@@ -15,7 +15,7 @@
     "precompiledReferences": [
         "nunit.framework.dll"
     ],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
