@@ -3,7 +3,7 @@ name: Unity Release
 on:
   push:
     branches:
-      - main_unity
+      - main
     
 jobs:
   upm-release:
@@ -12,7 +12,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Create Release for OpenUPM
-      # if: ${{ success() }}
       id: create_release
       uses: quabug/create-upm-release@v2
       env:

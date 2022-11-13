@@ -2,13 +2,13 @@ name: Unity Tests
 
 on:
   # push:
-    # branches: [ "main_unity" ]
+    # branches: [ "main" ]
   pull_request:
-    branches: [ "main_unity" ]
+    branches: [ "main" ]
 
 jobs:
   tests:
-
+    if: contains(github.head_ref, 'unity')
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -23,8 +23,6 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: Unity/Structrues-Unity/Library
-          # key: Library-${{ hashFiles('Unity/Structrues-Unity/Assets/**', 'Unity/Structrues-Unity/Packages/**', 'Unity/Structrues-Unity/ProjectSettings/**') }}
-          # key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/Assets/**/*.cs', 'Unity/Structrues-Unity/ProjectSettings/*.asset', 'Unity/Structrues-Unity/Packages/**/*.cs', 'Unity/Structrues-Unity/Packages/**/*.json') }}
           key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/**/*.cs') }}
           restore-keys: |
             Library-${{ runner.os }}-

@@ -1,20 +1,20 @@
 name: Net6 Tests
 
 on:
-  push:
-    branches: [ "main" ]
+  # push:
+    # branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
-
+    if: contains(github.head_ref, 'net6')
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v3  
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
