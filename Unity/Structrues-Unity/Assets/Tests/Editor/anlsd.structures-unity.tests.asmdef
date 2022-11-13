@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "anlsd.structures-unity"
+        "anlsd.structures-unity",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"
