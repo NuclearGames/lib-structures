@@ -70,6 +70,9 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
+#Not in unity projects
+!**/Unity/**/*.meta
+
 *.obj
 *.iobj
 *.pch
