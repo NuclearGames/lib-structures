@@ -13,18 +13,26 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - name: Project Tests
-      uses: game-ci/unity-test-runner@v2
-      env:
-        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-      with:
-        projectPath: Unity/Structrues-Unity
-        githubToken: ${{ secrets.GITHUB_TOKEN }}
-    - name: Package Tests
-      uses: game-ci/unity-test-runner@v2
-      env:
-        UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-      with:
-        projectPath: '*/Unity/Structrues-Unity/Packages/Structures-Unity'
-        githubToken: ${{ secrets.GITHUB_TOKEN }}
-    
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        # with:
+          # lfs: true
+          
+      # Cache
+      - uses: actions/cache@v2
+        with:
+          path: Unity/Structrues-Unity/Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+          
+      # Project Tests
+      - name: Project Tests
+        uses: game-ci/unity-test-runner@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          testMode : 'editmode'
+          projectPath: Unity/Structrues-Unity
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
