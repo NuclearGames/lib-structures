@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using NuclearGames.StructuresUnity.Randoms.Utils;
 using NUnit.Framework;
 
-namespace NuclearGames.StructuresUnity.Tests.Runtime.Randoms.Utils {
+namespace Tests.Editor.Randoms.Utils {
     public class NormalDistributorUnitTests {
         private NormalDistributor _distributor;
 
