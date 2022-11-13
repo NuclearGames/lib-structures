@@ -7,7 +7,7 @@ using Structures.NetSixZero.Randoms.Interfaces;
 
 
 namespace Structures_UnitTests_NetSixZero.Randoms {
-    public class FixedIntegerRandomUnitTests {
+   public class FixedIntegerRandomUnitTests {
         private IRandomizer _randomizer;
 
         [SetUp]
