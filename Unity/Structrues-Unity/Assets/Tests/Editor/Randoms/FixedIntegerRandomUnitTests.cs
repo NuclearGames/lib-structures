@@ -5,7 +5,7 @@ using NuclearGames.StructuresUnity.Randoms;
 using NuclearGames.StructuresUnity.Randoms.Interfaces;
 using NUnit.Framework;
 
-namespace NuclearGames.StructuresUnity.Tests.Runtime.Randoms {
+namespace Tests.Editor.Randoms {
     public class FixedIntegerRandomUnitTests {
         private IRandomizer _randomizer;
 

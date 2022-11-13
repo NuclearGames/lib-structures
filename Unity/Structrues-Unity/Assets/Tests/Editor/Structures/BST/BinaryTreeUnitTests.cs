@@ -4,7 +4,7 @@ using NuclearGames.StructuresUnity.Structures.BST;
 using NuclearGames.StructuresUnity.Structures.BST.Utils;
 using NUnit.Framework;
 
-namespace NuclearGames.StructuresUnity.Tests.Runtime.Structures.BST {
+namespace Tests.Editor.Structures.BST {
     public class BinaryTreeUnitTests {
         private readonly int[] _dataCollection = new int[] {
             9, 4, 17, 3, 6, 22, 5 ,7, 20
