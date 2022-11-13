@@ -25,6 +25,6 @@ jobs:
       env:
         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       with:
-        projectPath: Unity/Structrues-Unity/Packages/Structures-Unity
+        projectPath: '*/Unity/Structrues-Unity/Packages/Structures-Unity'
         githubToken: ${{ secrets.GITHUB_TOKEN }}
     
