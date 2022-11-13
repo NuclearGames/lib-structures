@@ -16,6 +16,14 @@ jobs:
         # with:
           # lfs: true
           
+      # Cache
+      - uses: actions/cache@v2
+        with:
+          path: Unity/Structrues-Unity/Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+          
       # Project Tests
       - name: Project Tests
         uses: game-ci/unity-test-runner@v2
@@ -25,13 +33,3 @@ jobs:
           testMode : 'editmode'
           projectPath: Unity/Structrues-Unity
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          
-      # # Package Tests
-      # - name: Package Tests
-        # uses: game-ci/unity-test-runner@v2
-        # env:
-          # UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        # with:
-          # projectPath: Unity/Structrues-Unity/Packages/Structures-Unity
-          # githubToken: ${{ secrets.GITHUB_TOKEN }}
-    
