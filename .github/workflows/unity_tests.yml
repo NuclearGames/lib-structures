@@ -1,8 +1,8 @@
 name: Unity Tests
 
 on:
-  push:
-    branches: [ "main_unity" ]
+  # push:
+    # branches: [ "main_unity" ]
   pull_request:
     branches: [ "main_unity" ]
 
