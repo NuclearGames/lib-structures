@@ -17,7 +17,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        target: main_unity
+        target: main
         upm_tag_prefix: v
         upm_package_path: Unity/Structrues-Unity/Packages/Structures-Unity
         create_unitypackage: true
