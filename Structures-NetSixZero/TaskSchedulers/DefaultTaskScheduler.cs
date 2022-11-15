@@ -16,7 +16,6 @@ namespace Structures.NetSixZero.TaskSchedulers {
         private readonly object _locker = new object(); 
         private bool _executingTask = false;
 
-        private bool _wasCurrentTaskDefined = false;
         private QueuedTaskEntity _currentTask = default;
 
         private int _idIncrementor;
@@ -48,11 +47,8 @@ namespace Structures.NetSixZero.TaskSchedulers {
                 await TaskExtensions.WaitUntil(() => _currentTask.Id == id);
             } else {
                 lock (_locker) {
-                    if (!_wasCurrentTaskDefined) {
-                        if (_identifierQueue.TryDequeue(out var nextTaskEntity)) {
-                            _currentTask = nextTaskEntity;
-                        }
-                        _wasCurrentTaskDefined = true;
+                    if (_identifierQueue.TryDequeue(out var nextTaskEntity)) {
+                        _currentTask = nextTaskEntity;
                     }
                 }
             }

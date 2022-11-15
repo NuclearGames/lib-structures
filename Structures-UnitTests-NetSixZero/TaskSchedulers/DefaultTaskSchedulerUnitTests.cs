@@ -45,6 +45,47 @@ namespace Structures_UnitTests_NetSixZero.TaskSchedulers {
             await ExecuteTest(_source);
         }
 
+        [Test]
+        public async Task ScheduleTest() {
+            bool done = false;
+            int taskChecker = 0;
+            object locker = new object();
+
+            void AssertTask(int taskNumber, bool end) {
+                lock (locker) {
+                    Assert.AreEqual(end ? taskChecker : (taskChecker + 1), taskNumber);
+                    taskChecker = taskNumber;
+                }
+            }
+
+            async Task Internal() {
+                var scheduler = new DefaultTaskScheduler();
+
+                await scheduler.Execute(async () => {
+                    AssertTask(1, false);
+                    await Task.Delay(20);
+                    AssertTask(1, true);
+                });
+
+                var task2 = scheduler.Execute(async () => {
+                    AssertTask(2, false);
+                    await Task.Delay(10);
+                    AssertTask(2, true);
+                });
+
+                var task3 = scheduler.Execute(async () => {
+                    AssertTask(3, false);
+                    await Task.Delay(10);
+                    AssertTask(3, true);
+                });
+
+                await Task.WhenAll(task2, task3);
+                done = true;
+            }
+
+            await Internal();
+        }
+
         private async Task ExecuteTest(IEnumerable<int> values) {
             // Debug.Log("Create callers");
             var taskCallers = values
