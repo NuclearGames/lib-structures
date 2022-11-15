@@ -1,8 +1,6 @@
-﻿using System;
-using Cysharp.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using Cysharp.Threading.Tasks;
 using NuclearGames.StructuresUnity.Structures.Collections;
-using UnityEngine;
+using System;
 
 namespace NuclearGames.StructuresUnity.TaskSchedulers {
     public sealed class DefaultTaskScheduler {
@@ -19,7 +17,6 @@ namespace NuclearGames.StructuresUnity.TaskSchedulers {
         private readonly object _locker = new object(); 
         private bool _executingTask = false;
 
-        private bool _wasCurrentTaskDefined = false;
         private QueuedTaskEntity _currentTask = default;
 
         private int _idIncrementor;
@@ -47,15 +44,12 @@ namespace NuclearGames.StructuresUnity.TaskSchedulers {
             }
 
             if (_executingTask) {
-                //Debug.Log($"Await task execution: '{id}'");
+                // Debug.Log($"Await task execution: '{id}'");
                 await UniTask.WaitUntil(() => _currentTask.Id == id);
             } else {
                 lock (_locker) {
-                    if (!_wasCurrentTaskDefined) {
-                        if (_identifierQueue.TryDequeue(out var nextTaskEntity)) {
-                            _currentTask = nextTaskEntity;
-                        }
-                        _wasCurrentTaskDefined = true;
+                    if (_identifierQueue.TryDequeue(out var nextTaskEntity)) {
+                        _currentTask = nextTaskEntity;
                     }
                 }
             }
@@ -65,12 +59,12 @@ namespace NuclearGames.StructuresUnity.TaskSchedulers {
                 _executingTask = true;
             }
             
-            // Debug.Log($"Start task execution: '{id}'");
+            //Debug.Log($"Start task execution: '{id}'");
             await _currentTask.Func();
             // Debug.Log($"End task execution: '{id}'");
 
             lock (_locker) {
-                //Debug.Log($"Unlock before task execution: '{id}'");
+                // Debug.Log($"Unlock before task execution: '{id}'");
                 _executingTask = false;
                 if (_identifierQueue.TryDequeue(out var nextTaskEntity)) {
                     _currentTask = nextTaskEntity;
