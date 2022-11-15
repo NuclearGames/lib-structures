@@ -43,6 +43,48 @@ namespace Tests.Editor.TaskSchedulers {
             return UniTask.ToCoroutine(async () => await ExecuteTest(_source));
         }
 
+        [UnityTest]
+        public IEnumerator ScheduleTest() {
+            bool done = false;
+            int taskChecker = 0;
+            object locker = new object();
+
+            void AssertTask(int taskNumber, bool end) {
+                lock (locker) {
+                    Assert.AreEqual(end ? taskChecker : (taskChecker+1), taskNumber);
+                    taskChecker = taskNumber;
+                }
+            }
+
+            async UniTask Internal() {
+                var scheduler = new DefaultTaskScheduler();
+
+                await scheduler.Execute(async () => {
+                    AssertTask(1, false);
+                    await UniTask.Delay(20);
+                    AssertTask(1, true);
+                });
+
+                var task2 = scheduler.Execute(async () => {
+                    AssertTask(2, false);
+                    await UniTask.Delay(10);
+                    AssertTask(2, true);
+                });
+
+                var task3 = scheduler.Execute(async () => {
+                    AssertTask(3, false);
+                    await UniTask.Delay(10);
+                    AssertTask(3, true);
+                });
+
+                await UniTask.WhenAll(task2, task3);
+                done = true;
+            }
+
+            Internal().Forget();
+            yield return new WaitUntil(() => done);
+        }
+
         private async UniTask ExecuteTest(IEnumerable<int> values) {
             // Debug.Log("Create callers");
             var taskCallers = values
