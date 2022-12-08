@@ -1,5 +1,5 @@
 ﻿using Structures.NetSixZero.Structures.Collections;
-using TaskExtensions = Structures.NetSixZero.Extension.TaskExtensions;
+using TaskExtensions = Structures.NetSixZero.Extensions.TaskExtensions;
 
 namespace Structures.NetSixZero.TaskSchedulers {
     public sealed class DefaultTaskScheduler {

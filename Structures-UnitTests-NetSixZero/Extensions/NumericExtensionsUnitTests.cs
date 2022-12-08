@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
-using Structures.NetSixZero.Extension;
+using Structures.NetSixZero.Extensions;
 
-namespace Structures_UnitTests_NetSixZero.Utils.Extension {
+namespace Structures_UnitTests_NetSixZero.Extensions {
     internal class NumericExtensionsUnitTests {
         [Test]
         public void LoopTest() {

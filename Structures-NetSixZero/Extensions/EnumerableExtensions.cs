@@ -1,4 +1,4 @@
-﻿namespace Structures.NetSixZero.Extension {
+﻿namespace Structures.NetSixZero.Extensions {
     public static class EnumerableExtensions {
         public static IEnumerable<long> Range(long start, long count) {
             var maxBound = long.MaxValue / 2 > count ? (start + count) : long.MaxValue; 

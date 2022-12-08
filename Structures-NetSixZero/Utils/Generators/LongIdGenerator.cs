@@ -1,4 +1,4 @@
-﻿using Structures.NetSixZero.Extension;
+﻿using Structures.NetSixZero.Extensions;
 
 namespace Structures.NetSixZero.Utils.Generators {
     public class LongIdGenerator: BaseIdGenerator<long> {

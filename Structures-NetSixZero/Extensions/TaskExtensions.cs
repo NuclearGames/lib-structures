@@ -1,4 +1,4 @@
-﻿namespace Structures.NetSixZero.Extension; 
+﻿namespace Structures.NetSixZero.Extensions; 
 
 public static class TaskExtensions {
     public static async Task WaitUntil(Func<bool> condition, int sleepTimeMs = 10) {

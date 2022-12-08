@@ -1,6 +1,9 @@
-﻿using Structures.NetSixZero.Extensions;
+﻿using NuclearGames.StructuresUnity.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Structures.NetSixZero.Pools {
+namespace NuclearGames.StructuresUnity.Pools {
     /// <summary>
     /// Пул, вычисляющий размер автоматически, как среднее из нескольких последних пиков потребления.
     /// </summary>
@@ -42,7 +45,7 @@ namespace Structures.NetSixZero.Pools {
                 throw new ArgumentException($"{nameof(settings.SizeControlDepth)} has invalid value.");
             }
 
-            if(settings.CreateFunction == null) {
+            if (settings.CreateFunction == null) {
                 throw new ArgumentException($"{nameof(settings.CreateFunction)} can not be null.");
             }
 
@@ -84,7 +87,7 @@ namespace Structures.NetSixZero.Pools {
             TryUpdateCurrentConsumption();
 
             T instance;
-            if (_container.Count > 0) {
+            if(_container.Count > 0) {
                 instance = _container.Dequeue();
             } else {
                 instance = _createFunction();
@@ -111,7 +114,7 @@ namespace Structures.NetSixZero.Pools {
         }
 
         private void TryUpdateCurrentConsumption() {
-            if(_currentCycleIndex == -1) {
+            if (_currentCycleIndex == -1) {
                 return;
             }
 
@@ -121,16 +124,16 @@ namespace Structures.NetSixZero.Pools {
         }
 
         public void Dispose() {
-            while(_container.Count > 0) {
+            while (_container.Count > 0) {
                 _removeAction?.Invoke(_container.Dequeue());
             }
         }
 
         public class Settings {
-            public Func<T>? CreateFunction { get; set; }
-            public Action<T>? RemoveAction { get; set; }
-            public Action<T>? GetAction { get; set; }
-            public Action<T>? ReleaseAction { get; set; }
+            public Func<T> CreateFunction { get; set; }
+            public Action<T> RemoveAction { get; set; }
+            public Action<T> GetAction { get; set; }
+            public Action<T> ReleaseAction { get; set; }
             public int? SizeControlDepth { get; set; }
             public int? StartSize { get; set; }
         }

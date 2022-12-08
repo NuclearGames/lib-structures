@@ -1,4 +1,6 @@
-﻿namespace Structures.NetSixZero.Extension {
+﻿using System;
+
+namespace NuclearGames.StructuresUnity.Extensions {
     public static class NumericExtensions {
         /// <summary>
         /// Залупливает число в промежутке от 0 (включительно) до count (невключительно).
