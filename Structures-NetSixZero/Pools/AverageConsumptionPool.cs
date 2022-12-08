@@ -1,8 +1,8 @@
 ﻿using Structures.NetSixZero.Extension;
 
 namespace Structures.NetSixZero.Pools {
-    public sealed class AverageConsumptionPool<T> {
-        private const int SIZE_CONTROL_DEPTH_DEFAULT = 5;
+    public class AverageConsumptionPool<T> {
+        private const int SIZE_CONTROL_DEPTH_DEFAULT = 4;
         private const int SIZE_DEFAULT = 0;
 
         public int Size { get; private set; }
@@ -12,12 +12,20 @@ namespace Structures.NetSixZero.Pools {
         private readonly Action<T>? _removeAction;
         private readonly int[] _sizeControl;
 
+        /// <summary>
+        /// Индекс текущего цикла из <see cref="_sizeControl"/>.
+        /// </summary>
         private int _currentCycleIndex;
+
+        /// <summary>
+        /// Кол-во используемых в данный момент элементов.
+        /// </summary>
+        private int _inUse;
 
         public AverageConsumptionPool(Func<T> createFunction, Action<T>? removeAction, 
             int startSize = SIZE_DEFAULT, int sizeControlDepth = SIZE_CONTROL_DEPTH_DEFAULT) {
 
-            if (startSize <= 0) {
+            if (startSize < 0) {
                 throw new ArgumentException($"{nameof(startSize)} has invalid value.");
             }
 
@@ -35,23 +43,32 @@ namespace Structures.NetSixZero.Pools {
             StartCycle();
         }
 
+        /// <summary>
+        /// Вычисляет новый размер.
+        /// Начинает новый отсчет потребления.
+        /// </summary>
         public void StartCycle() {
+            TryUpdateCurrentConsumption();
             Size = (int)Math.Ceiling(_sizeControl.Average());
             _currentCycleIndex = (_currentCycleIndex + 1).Loop(_sizeControl.Length);
             _sizeControl[_currentCycleIndex] = 0;
         }
 
         public T Get() {
-            _sizeControl[_currentCycleIndex]++;
+            _inUse++;
+            TryUpdateCurrentConsumption();
 
             if (_container.Count > 0) {
                 return _container.Dequeue();
             }
-            return CreateNewInstance();
+
+            return _createFunction();
         }
 
         public void Return(T instance) {
-            if(_container.Count < Size) {
+            _inUse = Math.Max(_inUse - 1, 0);
+
+            if (_container.Count < Size) {
                 _container.Enqueue(instance);
                 return;
             }
@@ -59,8 +76,10 @@ namespace Structures.NetSixZero.Pools {
             _removeAction?.Invoke(instance);
         }
 
-        private T CreateNewInstance() {
-            return _createFunction();
+        private void TryUpdateCurrentConsumption() {
+            if (_inUse > _sizeControl[_currentCycleIndex]) {
+                _sizeControl[_currentCycleIndex] = _inUse;
+            }
         }
     }
 }
