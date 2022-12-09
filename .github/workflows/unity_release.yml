@@ -1,13 +1,17 @@
 name: Unity Release
 
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types:
+      - closed
     
 jobs:
   upm-release:
+    if: contains(github.head_ref, 'unity') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v3
