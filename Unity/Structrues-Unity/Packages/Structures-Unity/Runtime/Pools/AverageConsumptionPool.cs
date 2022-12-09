@@ -1,7 +1,6 @@
 ﻿using NuclearGames.StructuresUnity.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NuclearGames.StructuresUnity.Pools {
     /// <summary>
@@ -22,9 +21,9 @@ namespace NuclearGames.StructuresUnity.Pools {
         private readonly List<int> _sizeControl;
         private readonly int _sizeControlDepth;
         private readonly Func<T> _createFunction;
-        private readonly Action<T>? _removeAction;
-        private readonly Action<T>? _getAction;
-        private readonly Action<T>? _releaseAction;
+        private readonly Action<T> _removeAction;
+        private readonly Action<T> _getAction;
+        private readonly Action<T> _releaseAction;
 
         /// <summary>
         /// Индекс текущего цикла из <see cref="_sizeControl"/>.
@@ -35,6 +34,11 @@ namespace NuclearGames.StructuresUnity.Pools {
         /// Кол-во используемых в данный момент элементов.
         /// </summary>
         private int _inUse;
+
+        /// <summary>
+        /// Сумма элементов <see cref="_sizeControl"/>.
+        /// </summary>
+        private int _currentSizeControlSum;
 
         public AverageConsumptionPool(Settings settings) {
             if (settings.StartSize != null && settings.StartSize < 0) {
@@ -68,14 +72,12 @@ namespace NuclearGames.StructuresUnity.Pools {
         /// </summary>
         public void ResetCycle() {
             TryUpdateCurrentConsumption();
-            Size = (int)Math.Ceiling(_sizeControl.Average());
-            _currentCycleIndex = (_currentCycleIndex + 1).Loop(_sizeControlDepth);
 
-            if (_sizeControl.Count <= _currentCycleIndex) {
-                _sizeControl.Add(0);
-            } else {
-                _sizeControl[_currentCycleIndex] = 0;
-            }
+            _currentSizeControlSum += _sizeControl[_currentCycleIndex];
+
+            Size = (int)Math.Ceiling(_currentSizeControlSum / (float)_sizeControl.Count);
+
+            _currentSizeControlSum -= IncrementCycleIndex();
         }
 
         /// <summary>
@@ -87,7 +89,7 @@ namespace NuclearGames.StructuresUnity.Pools {
             TryUpdateCurrentConsumption();
 
             T instance;
-            if(_container.Count > 0) {
+            if (_container.Count > 0) {
                 instance = _container.Dequeue();
             } else {
                 instance = _createFunction();
@@ -120,6 +122,23 @@ namespace NuclearGames.StructuresUnity.Pools {
 
             if (_inUse > _sizeControl[_currentCycleIndex]) {
                 _sizeControl[_currentCycleIndex] = _inUse;
+            }
+        }
+
+        /// <summary>
+        /// Передвигает индекс текущего цикла.
+        /// Добавляет или очищает ячейку массива.
+        /// </summary>
+        /// <returns>Значение которое было затерто.</returns>
+        private int IncrementCycleIndex() {
+            _currentCycleIndex = (_currentCycleIndex + 1).Loop(_sizeControlDepth);
+            if (_sizeControl.Count <= _currentCycleIndex) {
+                _sizeControl.Add(0);
+                return 0;
+            } else {
+                int valueToRemove = _sizeControl[_currentCycleIndex];
+                _sizeControl[_currentCycleIndex] = 0;
+                return valueToRemove;
             }
         }
 
