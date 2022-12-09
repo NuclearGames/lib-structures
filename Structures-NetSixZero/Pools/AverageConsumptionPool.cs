@@ -33,6 +33,11 @@ namespace Structures.NetSixZero.Pools {
         /// </summary>
         private int _inUse;
 
+        /// <summary>
+        /// Сумма элементов <see cref="_sizeControl"/>.
+        /// </summary>
+        private int _currentSizeControlSum;
+
         public AverageConsumptionPool(Settings settings) {
             if (settings.StartSize != null && settings.StartSize < 0) {
                 throw new ArgumentException($"{nameof(settings.StartSize)} has invalid value.");
@@ -65,14 +70,12 @@ namespace Structures.NetSixZero.Pools {
         /// </summary>
         public void ResetCycle() {
             TryUpdateCurrentConsumption();
-            Size = (int)Math.Ceiling(_sizeControl.Average());
-            _currentCycleIndex = (_currentCycleIndex + 1).Loop(_sizeControlDepth);
 
-            if (_sizeControl.Count <= _currentCycleIndex) {
-                _sizeControl.Add(0);
-            } else {
-                _sizeControl[_currentCycleIndex] = 0;
-            }
+            _currentSizeControlSum += _sizeControl[_currentCycleIndex];
+
+            Size = (int)Math.Ceiling(_currentSizeControlSum / (float)_sizeControl.Count);
+
+            _currentSizeControlSum -= IncrementCycleIndex();
         }
 
         /// <summary>
@@ -117,6 +120,23 @@ namespace Structures.NetSixZero.Pools {
 
             if (_inUse > _sizeControl[_currentCycleIndex]) {
                 _sizeControl[_currentCycleIndex] = _inUse;
+            }
+        }
+
+        /// <summary>
+        /// Передвигает индекс текущего цикла.
+        /// Добавляет или очищает ячейку массива.
+        /// </summary>
+        /// <returns>Значение которое было затерто.</returns>
+        private int IncrementCycleIndex() {
+            _currentCycleIndex = (_currentCycleIndex + 1).Loop(_sizeControlDepth);
+            if (_sizeControl.Count <= _currentCycleIndex) {
+                _sizeControl.Add(0);
+                return 0;
+            } else {
+                int valueToRemove = _sizeControl[_currentCycleIndex];
+                _sizeControl[_currentCycleIndex] = 0;
+                return valueToRemove;
             }
         }
 
