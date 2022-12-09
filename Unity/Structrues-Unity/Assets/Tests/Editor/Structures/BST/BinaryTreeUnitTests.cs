@@ -245,6 +245,40 @@ namespace Tests.Editor.Structures.BST {
             Assert.AreEqual(5, anyValue);
         }
 
+        /// <summary>
+        /// Проверяет вызов получения и освобождения нода.
+        /// </summary>
+        [Test]
+        public void GetReleaseNodeTest() {
+            int useNodesCounter = 0;
+
+            Node<int> GetNode(int data) {
+                useNodesCounter++;
+                return new Node<int>(data);
+            }
+
+            void ReleaseNode(Node<int> node) {
+                useNodesCounter--;
+            }
+
+            var tree = new GetReleaseNodeTree<int>(GetNode, ReleaseNode);
+
+            tree.Add(1);
+            tree.Add(2);
+            tree.Add(3);
+            tree.Add(4);
+            tree.Add(5);
+            Assert.AreEqual(5, useNodesCounter);
+
+            tree.Remove(4);
+            tree.Remove(2);
+            tree.Remove(5);
+            Assert.AreEqual(2, useNodesCounter);
+            tree.Remove(3);
+            tree.Remove(1);
+            Assert.AreEqual(0, useNodesCounter);
+        }
+
 #region Utils
 
         private void FillTree(in bool checkAssertion = false) {
@@ -286,5 +320,16 @@ namespace Tests.Editor.Structures.BST {
         }
 
 #endregion
+
+        private class GetReleaseNodeTree<T> : BinaryTree<T> where T : IComparable<T> {
+            private readonly Func<T, Node<T>> _getNode;
+            private readonly Action<Node<T>> _releaseNode;
+            public GetReleaseNodeTree(Func<T, Node<T>> getNode, Action<Node<T>> releaseNode) {
+                _getNode = getNode;
+                _releaseNode = releaseNode;
+            }
+            protected override Node<T> GetNode(T data) => _getNode(data);
+            protected override void ReleaseNode(Node<T> node) => _releaseNode(node);
+        }
     }
 }

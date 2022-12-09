@@ -9,7 +9,7 @@
         <PackageId>NuGet.Structures-NetSixZero</PackageId>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/NuclearGames/Structures</RepositoryUrl>
-        <PackageVersion>1.2.1</PackageVersion>
+        <PackageVersion>1.2.2</PackageVersion>
     </PropertyGroup>
 
 </Project>

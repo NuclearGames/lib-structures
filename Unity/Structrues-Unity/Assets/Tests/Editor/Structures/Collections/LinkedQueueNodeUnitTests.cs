@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NuclearGames.StructuresUnity.Structures.Collections;
+using NuclearGames.StructuresUnity.Structures.Collections.Utils;
 using NUnit.Framework;
 
 namespace Tests.Editor.Structures.Collections {
@@ -149,6 +150,48 @@ namespace Tests.Editor.Structures.Collections {
             queue.Enqueue(2);
             var nextNode = node.Next;
             Assert.AreEqual(2, nextNode!.Value);
+        }
+
+        /// <summary>
+        /// Проверяет вызов получения и освобождения нода.
+        /// </summary>
+        [Test]
+        public void GetReleaseNodeTest() {
+            GetReleaseNodeLinkedQueue<int>? queue = null;
+            int useNodesCounter = 0;
+
+            LinkedQueueNode<int> GetNode(int data) {
+                useNodesCounter++;
+                return new LinkedQueueNode<int>(queue, data);
+            }
+
+            void ReleaseNode(LinkedQueueNode<int> node) {
+                useNodesCounter--;
+            }
+
+            queue = new GetReleaseNodeLinkedQueue<int>(GetNode, ReleaseNode);
+
+            queue.Enqueue(1);
+            queue.Enqueue(2);
+            queue.Enqueue(3);
+            Assert.AreEqual(3, useNodesCounter);
+
+            queue.TryDequeue(out _);
+            Assert.AreEqual(2, useNodesCounter);
+            queue.TryDequeue(out _);
+            queue.TryDequeue(out _);
+            Assert.AreEqual(0, useNodesCounter);
+        }
+
+        private class GetReleaseNodeLinkedQueue<T> : LinkedQueue<T> {
+            private readonly Func<T, LinkedQueueNode<T>> _getNode;
+            private readonly Action<LinkedQueueNode<T>> _releaseNode;
+            public GetReleaseNodeLinkedQueue(Func<T, LinkedQueueNode<T>> getNode, Action<LinkedQueueNode<T>> releaseNode) {
+                _getNode = getNode;
+                _releaseNode = releaseNode;
+            }
+            protected override LinkedQueueNode<T> GetNode(T value) => _getNode(value);
+            protected override void ReleaseNode(LinkedQueueNode<T> node) => _releaseNode(node);
         }
     }
 }
