@@ -40,7 +40,7 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
         public bool TryAdd(TData data, out Node<TData> resultNode) {
             if (IsEmpty) {
-                Root = new Node<TData>(data);
+                Root = GetNode(data);
                 resultNode = Root;
                 NodesCount++;
                 return true;
@@ -53,7 +53,7 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
                 var compareResult = Compare(dataValue, currentNode.Data);
                 if (compareResult < 0) {
                     if (currentNode.Left == null) {
-                        currentNode.Left = new Node<TData>(data);
+                        currentNode.Left = GetNode(data);
                         resultNodeInternal = currentNode.Left;
                         return true;
                     }
@@ -62,7 +62,7 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
 
                 if (compareResult > 0) {
                     if (currentNode.Right == null) {
-                        currentNode.Right = new Node<TData>(data);
+                        currentNode.Right = GetNode(data);
                         resultNodeInternal = currentNode.Right;
                         return true;
                     }
@@ -233,21 +233,21 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
                 // node has no children
                 if (currentNode.Left == null && currentNode.Right == null) {
                     internalResultNode = null;
-
+                    ReleaseNode(currentNode);
                     return true;
                 }
 
                 // node has no left child
                 if (currentNode.Left == null) {
                     internalResultNode = currentNode.Right;
-
+                    ReleaseNode(currentNode);
                     return true;
                 }
 
                 // node has no right child
                 if (currentNode.Right == null) {
                     internalResultNode = currentNode.Left;
-
+                    ReleaseNode(currentNode);
                     return true;
                 }
 
@@ -262,7 +262,8 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
 
                 internalResult = TryRemoveInternal(currentNode.Right, tempNode.Data, out replaceNode);
                 currentNode.Right = replaceNode;
-                        
+
+                ReleaseNode(tempNode);
                 return internalResult;
             }
 
@@ -329,8 +330,14 @@ namespace NuclearGames.StructuresUnity.Structures.BST {
         /// </summary>
         public bool IsBalanced() => FindMinHeight() >= FindMaxHeight() - 1;
 
+        protected virtual Node<TData> GetNode(TData data) {
+            return new Node<TData>(data);
+        }
+
+        protected virtual void ReleaseNode(Node<TData> node) { }
+
 #region IAnyCollection
-        
+
         /// <summary>
         /// Является ли дерево пустым
         /// </summary>

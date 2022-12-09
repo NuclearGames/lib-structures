@@ -38,7 +38,7 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
         /// Добавляет элемент в конец однонаправленного связного спика
         /// </summary>
         public void Enqueue(T value) {
-            var node = new LinkedQueueNode<T>(this, value);
+            var node = GetNode(value);
             if (Count == 0) {
                 _head = node;
                 _tail = node;
@@ -68,9 +68,16 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
             if (--Count == 0) {
                 _tail = null;
             }
-            
+
+            ReleaseNode(removeNode);
             return true;
         }
+
+        protected virtual LinkedQueueNode<T> GetNode(T value) {
+            return new LinkedQueueNode<T>(this, value);
+        }
+
+        protected virtual void ReleaseNode(LinkedQueueNode<T> node) { }
 
 #region Inherits
         bool ICollection.IsSynchronized => false;
