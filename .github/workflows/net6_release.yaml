@@ -1,44 +1,40 @@
 name: Net6 Release
 
 on:
-  push:
-    tags:
-    - "Net6_v[0-9]+.[0-9]+.[0-9]+"
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+      
 jobs:
   build_and_publish:
+    if: contains(github.head_ref, 'net6') && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     timeout-minutes: 6
     
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    # - name: Verify commit exists in origin/main
-    #  run: |
-    #    git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-    #    git branch --remote --contains | grep origin/main
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
       if: ${{ success() }}
-      
-    # SET NET6 variables
-    - name: Try set LIB_TYPE='Net6' from tag
-      if: startsWith(github.ref, 'refs/tags/Net6')
-      run: |
-        echo "LIB_TYPE=NetSixZero" >> $GITHUB_ENV
-        echo "VERSION=${GITHUB_REF/refs\/tags\/Net6_v/}" >> $GITHUB_ENV
                
     - name: Restore dependencies
       run: dotnet restore
+
     - name: Build
-      run: dotnet build Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
+      run: dotnet build Structures-NetSixZero --configuration Release --no-restore --verbosity normal
     - name: Test
-      run: dotnet test Structures-${LIB_TYPE} --no-build --configuration Release --verbosity normal
+      run: dotnet test Structures-NetSixZero --no-build --configuration Release --verbosity normal
     - name: Pack
-      run: dotnet pack Structures-${LIB_TYPE} --configuration Release /p:Version=${VERSION} --no-build --output .
+      run: dotnet pack Structures-NetSixZero --configuration Release --no-build --output .
+
     - name: Push
-      run: dotnet nuget push ./NuGet.Structures-${LIB_TYPE}.${VERSION}.nupkg --source https://nuget.pkg.github.com/NuclearGames/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push ./NuGet.Structures-NetSixZero.*.nupkg --source https://nuget.pkg.github.com/NuclearGames/index.json --api-key ${GITHUB_TOKEN}
       
     env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

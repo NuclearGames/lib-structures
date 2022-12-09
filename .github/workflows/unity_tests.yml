@@ -1,10 +1,12 @@
 name: Unity Tests
 
 on:
-  # push:
-    # branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    types:
+      - created
+      - edited
 
 jobs:
   tests:
