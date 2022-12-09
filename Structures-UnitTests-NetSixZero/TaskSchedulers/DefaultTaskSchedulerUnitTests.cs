@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Structures.NetSixZero.TaskSchedulers;
-using TaskExtensions = Structures.NetSixZero.Extension.TaskExtensions;
+using TaskExtensions = Structures.NetSixZero.Extensions.TaskExtensions;
 
 namespace Structures_UnitTests_NetSixZero.TaskSchedulers {
     internal sealed class DefaultTaskSchedulerUnitTests {
