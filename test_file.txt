@@ -1,2 +1,3 @@
 should run tests from unity and net6
 09/12/22: Test trigger net6_tests
+09/12/22: Test trigger net6_tests 1
