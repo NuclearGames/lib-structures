@@ -11,7 +11,7 @@
 
 #nullable disable
 
-        internal LinkedQueueNode(LinkedQueue<T> queue, T value) {
+        public LinkedQueueNode(LinkedQueue<T> queue, T value) {
             Collection = queue;
             item = value;
         }
