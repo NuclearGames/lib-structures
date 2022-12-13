@@ -13,7 +13,7 @@
   ],
   "unityRelease": "0f1",
   "dependencies": {
-    "com.cysharp.unitask": "2.3.1"
+    "com.cysharp.unitask": "2.3.2"
   },
   "type": "library"
 }
