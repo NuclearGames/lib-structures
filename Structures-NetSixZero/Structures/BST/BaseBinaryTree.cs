@@ -282,6 +282,46 @@ namespace Structures.NetSixZero.Structures.BST {
         }
 
         /// <summary>
+        /// Пытается извлечь нод с минимальным значением.
+        /// </summary>
+        /// <param name="resultNode">Извлеченный нод или NULL.</param>
+        /// <returns>True - нод был извлечен; False - нет нод.</returns>
+        public bool TryDequeue(out Node<TData>? resultNode) {
+            if (IsEmpty) {
+                resultNode = null;
+                return false;
+            }
+
+            if(Root == null) {
+                Console.WriteLine($"null: {IsEmpty}, {NodesCount}");
+            }
+
+            // Добегаем до последнего левого нода (минимальное значение).
+            Node<TData>? prev = null;
+            Node<TData> current = Root!;
+            while(current.Left != null) {
+                prev = current;
+                current = current.Left;
+            }
+
+            if (prev == null) {
+                // Делаем правый нод корня новым корневым.
+                // Если правого нода не было - прекинется NULL.
+                Root = current.Right; 
+            } else {
+                // Перекидываем правый нод наименьшего на его родителя.
+                // Если правого нода не было - прекинется NULL.
+                prev.Left = current.Right;
+            }
+            NodesCount--;
+
+            ReleaseNode(current);
+
+            resultNode = current;
+            return true;
+        }
+
+        /// <summary>
         /// Очишает все дерево
         /// </summary>
         public void Clear() {
