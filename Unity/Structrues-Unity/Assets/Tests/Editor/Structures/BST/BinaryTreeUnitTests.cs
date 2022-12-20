@@ -279,6 +279,33 @@ namespace Tests.Editor.Structures.BST {
             Assert.AreEqual(0, useNodesCounter);
         }
 
+        /// <summary>
+        /// Проверяет:
+        /// - ноды извлекаются в правильном порядке.
+        /// </summary>
+        [Test]
+        public void TryDequeueTest() {
+            _tree.Add(10);
+            _tree.Add(9);
+            _tree.Add(4);
+            _tree.Add(6);
+            _tree.Add(5);
+            _tree.Add(7);
+            _tree.Add(12);
+            _tree.Add(11);
+
+            int[] dequeueOrder = new int[] { 4, 5, 6, 7, 9, 10, 11, 12 };
+            int nodesCount = dequeueOrder.Length;
+
+            foreach (int expected in dequeueOrder) {
+                Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+                Assert.That(_tree.TryDequeue(out var node), Is.True);
+                Assert.That(node!.Data, Is.EqualTo(expected));
+            }
+            Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+            Assert.That(_tree.TryDequeue(out _), Is.False);
+        }
+
 #region Utils
 
         private void FillTree(in bool checkAssertion = false) {
