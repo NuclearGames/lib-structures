@@ -18,10 +18,6 @@
         public WriteLockToken WriteLock() {
             return new(_lock, _time);
         }
-        
-        public ReadWriteLockToken ReadWriteLock() {
-            return new(_lock, _time);
-        }
 
         public void Dispose() {
             _lock.Dispose();
@@ -57,31 +53,6 @@
             public void Dispose() {
                 if (_rwLock.IsReadLockHeld) {
                     _rwLock.ExitReadLock();
-                }
-            }
-        }
-        
-        public readonly struct ReadWriteLockToken : IDisposable {
-            private readonly ReaderWriterLockSlim _rwLock;
-
-            public ReadWriteLockToken(ReaderWriterLockSlim rwLock, TimeSpan time) {
-                _rwLock = rwLock;
-                if (!_rwLock.TryEnterUpgradeableReadLock(time)) {
-                    throw new TimeoutException("Enter upgradeable read lock timeout");
-                }
-                
-                if (!_rwLock.TryEnterWriteLock(time)) {
-                    throw new TimeoutException("Enter write lock timeout");
-                }
-            }
-
-            public void Dispose() {
-                if (_rwLock.IsUpgradeableReadLockHeld) {
-                    _rwLock.ExitUpgradeableReadLock();
-                }
-                
-                if (_rwLock.IsWriteLockHeld) {
-                    _rwLock.ExitWriteLock();
                 }
             }
         }

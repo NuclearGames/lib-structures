@@ -95,7 +95,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="data">Данные, необходмые удалить из дерева</param>
         /// <returns>True - данные найдены и удалить получилось. False - данные найдены не были </returns>
         public new bool Remove(T data) {
-            using (_rwLock.ReadWriteLock()) {
+            using (_rwLock.WriteLock()) {
                 return base.Remove(data);
             }
         }

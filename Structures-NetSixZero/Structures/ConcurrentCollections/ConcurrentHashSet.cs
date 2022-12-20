@@ -17,7 +17,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         }
         
         public new int RemoveWhere(Predicate<T> match) {
-            using (_rwLock.ReadWriteLock()) {
+            using (_rwLock.WriteLock()) {
                 return base.RemoveWhere(match);
             }
         }
@@ -161,7 +161,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         }
 
         public new bool Remove(T item) {
-            using (_rwLock.ReadWriteLock()) {
+            using (_rwLock.WriteLock()) {
                 return base.Remove(item);
             }
         }

@@ -297,31 +297,31 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region Remove
 
         public new bool Remove(T item) {
-            using (_lock.ReadWriteLock()) {
+            using (_lock.WriteLock()) {
                 return base.Remove(item);
             }
         }
         
         public new int RemoveAll(Predicate<T> match) {
-            using (_lock.ReadWriteLock()) {
+            using (_lock.WriteLock()) {
                 return base.RemoveAll(match);
             }
         }
         
         public new void RemoveAt(int index) {
-            using (_lock.ReadWriteLock()) {
+            using (_lock.WriteLock()) {
                 base.RemoveAt(index);
             }
         }
 
         public new void RemoveRange(int index, int count) {
-            using (_lock.ReadWriteLock()) {
+            using (_lock.WriteLock()) {
                 base.RemoveRange(index, count);
             }
         }
         
         public new void Clear() {
-            using (_lock.ReadWriteLock()) {
+            using (_lock.WriteLock()) {
                 base.Clear();
             }
         }
