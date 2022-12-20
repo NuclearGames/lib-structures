@@ -12,6 +12,14 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
                 }
             }
         }
+
+        public new int Count {
+            get {
+                using (_lock.ReadLock()) {
+                    return base.Count;
+                }
+            }
+        }
         
         public ConcurrentList(TimeSpan time) {
             _lock = new RWLock(time, LockRecursionPolicy.NoRecursion);
