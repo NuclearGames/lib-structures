@@ -1,5 +1,8 @@
 ﻿namespace Structures.NetSixZero.Structures.ConcurrentCollections.Utils {
-    internal class RWLock : IDisposable {
+    /// <summary>
+    /// Обертка над <see cref="ReaderWriterLockSlim"/>.
+    /// </summary>
+    public class RWLock : IDisposable {
         private readonly ReaderWriterLockSlim _lock;
         private readonly TimeSpan _time;
     

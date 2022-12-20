@@ -1,335 +1,175 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
+using Structures.NetSixZero.Structures.ConcurrentCollections.Utils;
 
 namespace Structures.NetSixZero.Structures.ConcurrentCollections {
     public class ConcurrentHashSet<T> : HashSet<T> {
-        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.NoRecursion);
-        private readonly TimeSpan _time;
+        private readonly RWLock _rwLock;
 
         public ConcurrentHashSet(TimeSpan time) {
-            _time = time;
-        }
-        
-        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.GetObjectData(info, context);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public override void OnDeserialization(object? sender) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.OnDeserialization(sender);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
+            _rwLock = new RWLock(time, LockRecursionPolicy.NoRecursion);
         }
         
         public new bool TryGetValue(T equalValue, [MaybeNullWhen(false)] out T actualValue) {
-            _lock.TryEnterReadLock(_time);
-            try {
+            using (_rwLock.ReadLock()) {
                 return base.TryGetValue(equalValue, out actualValue);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new void UnionWith(IEnumerable<T> other) {
-            _lock.TryEnterWriteLock(_time);
-            try {
-                base.UnionWith(other);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-        
-        public new void IntersectWith(IEnumerable<T> other) {
-            _lock.TryEnterWriteLock(_time);
-            try {
-                base.IntersectWith(other);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-        
-        public new void ExceptWith(IEnumerable<T> other) {
-            _lock.TryEnterWriteLock(_time);
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.ExceptWith(other);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new void SymmetricExceptWith(IEnumerable<T> other) {
-            _lock.TryEnterWriteLock(_time);
-            try {
-                base.SymmetricExceptWith(other);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-        
-        public new bool IsSubsetOf(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.IsSubsetOf(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new bool IsProperSubsetOf(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.IsProperSubsetOf(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new bool IsSupersetOf(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.IsSupersetOf(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new bool IsProperSupersetOf(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.IsProperSupersetOf(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-
-        public new bool Overlaps(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.Overlaps(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-        
-        public new bool SetEquals(IEnumerable<T> other) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                return base.SetEquals(other);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-
-        public new void CopyTo(T[] array) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.CopyTo(array);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-
-        public new void CopyTo(T[] array, int arrayIndex) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.CopyTo(array, arrayIndex);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
-            }
-        }
-
-        public new void CopyTo(T[] array, int arrayIndex, int count) {
-            _lock.TryEnterReadLock(_time);
-            try {
-                base.CopyTo(array, arrayIndex, count);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
             }
         }
         
         public new int RemoveWhere(Predicate<T> match) {
-            _lock.TryEnterReadLock(_time);
-            _lock.TryEnterWriteLock(_time);
-            try {
+            using (_rwLock.ReadWriteLock()) {
                 return base.RemoveWhere(match);
             }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
+        }
 
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-        
-        public new IEqualityComparer<T> Comparer {
-            get {
-                _lock.TryEnterReadLock(_time);
-                try {
-                    return base.Comparer;
-                }
-                finally {
-                    if (_lock.IsReadLockHeld) {
-                        _lock.ExitReadLock();
-                    }
-                }
-            }
-        }
-        
-        public new int EnsureCapacity(int capacity)
-        {
-            _lock.TryEnterReadLock(_time);
-            try {
+        public new int EnsureCapacity(int capacity) {
+            using (_rwLock.ReadLock()) {
                 return base.EnsureCapacity(capacity);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
             }
         }
         
         public new void TrimExcess() {
-            _lock.TryEnterReadLock(_time);
-            try {
+            using (_rwLock.WriteLock()) {
                 base.TrimExcess();
             }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
+        }
+
+#region ISerializable
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context) {
+            using (_rwLock.ReadLock()) {
+                base.GetObjectData(info, context);
             }
         }
+        
+        public override void OnDeserialization(object? sender) {
+            using (_rwLock.ReadLock()) {
+                base.OnDeserialization(sender);
+            }
+        }
+
+#endregion
+
+#region Boolean operations
+
+        public new void UnionWith(IEnumerable<T> other) {
+            using (_rwLock.WriteLock()) {
+                base.UnionWith(other);
+            }
+        }
+        
+        public new void IntersectWith(IEnumerable<T> other) {
+            using (_rwLock.WriteLock()) {
+                base.IntersectWith(other);
+            }
+        }
+        
+        public new void ExceptWith(IEnumerable<T> other) {
+            using (_rwLock.WriteLock()) {
+                base.ExceptWith(other);
+            }
+        }
+        
+        public new void SymmetricExceptWith(IEnumerable<T> other) {
+            using (_rwLock.WriteLock()) {
+                base.SymmetricExceptWith(other);
+            }
+        }
+
+#endregion
+
+#region Set Comparison
+
+        public new bool IsSubsetOf(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.IsSubsetOf(other);
+            }
+        }
+        
+        public new bool IsProperSubsetOf(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.IsProperSubsetOf(other);
+            }
+        }
+        
+        public new bool IsSupersetOf(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.IsSupersetOf(other);
+            }
+        }
+        
+        public new bool IsProperSupersetOf(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.IsProperSupersetOf(other);
+            }
+        }
+
+        public new bool Overlaps(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.Overlaps(other);
+            }
+        }
+        
+        public new bool SetEquals(IEnumerable<T> other) {
+            using (_rwLock.ReadLock()) {
+                return base.SetEquals(other);
+            }
+        }
+
+#endregion
+
+#region CopyTo
+
+        public new void CopyTo(T[] array) {
+            using (_rwLock.ReadLock()) {
+                base.CopyTo(array);
+            }
+        }
+
+        public new void CopyTo(T[] array, int arrayIndex) {
+            using (_rwLock.ReadLock()) {
+                base.CopyTo(array, arrayIndex);
+            }
+        }
+
+        public new void CopyTo(T[] array, int arrayIndex, int count) {
+            using (_rwLock.ReadLock()) {
+                base.CopyTo(array, arrayIndex, count);
+            }
+        }
+
+#endregion
 
 #region ICollection<T>
 
         public new bool Add(T item) {
-            _lock.TryEnterWriteLock(_time);
-            try {
+            using (_rwLock.WriteLock()) {
                 return base.Add(item);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
             }
         }
 
         public new void Clear() {
-            List<int> list = new List<int>();
-
-            _lock.TryEnterWriteLock(_time);
-            try {
+            using (_rwLock.WriteLock()) {
                 base.Clear();
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
             }
         }
 
         public new bool Contains(T item) {
-            _lock.TryEnterReadLock(_time);
-            try {
+            using (_rwLock.ReadLock()) {
                 return base.Contains(item);
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
             }
         }
 
         public new bool Remove(T item) {
-            _lock.TryEnterUpgradeableReadLock(_time);
-            _lock.TryEnterWriteLock(_time);
-            try {
+            using (_rwLock.ReadWriteLock()) {
                 return base.Remove(item);
-            }
-            finally {
-                if (_lock.IsWriteLockHeld) {
-                    _lock.ExitWriteLock();
-                }
-
-                if (_lock.IsUpgradeableReadLockHeld) {
-                    _lock.ExitUpgradeableReadLock();
-                }
             }
         }
 
         public new int Count {
             get {
-                _lock.TryEnterReadLock(_time);
-                try {
+                using (_rwLock.ReadLock()) {
                     return base.Count;
-                }
-                finally {
-                    if (_lock.IsReadLockHeld) {
-                        _lock.ExitReadLock();
-                    }
                 }
             }
         }
@@ -339,14 +179,8 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region IEnumerable
 
         public new IEnumerator<T> GetEnumerator() {
-            _lock.TryEnterReadLock(_time);
-            try {
+            using (_rwLock.ReadLock()) {
                 return base.GetEnumerator();
-            }
-            finally {
-                if (_lock.IsReadLockHeld) {
-                    _lock.ExitReadLock();
-                }
             }
         }
 
@@ -355,7 +189,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region Dispose
 
         ~ConcurrentHashSet() {
-            _lock.Dispose();
+            _rwLock?.Dispose();
         }
 
 #endregion
