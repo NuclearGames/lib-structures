@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Structures.NetSixZero.Structures.BST;
 using Structures.NetSixZero.Structures.BST.Utils;
@@ -273,11 +275,38 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
 
             tree.Remove(4);
             tree.Remove(2);
-            tree.Remove(5);
+            tree.TryDequeue(out _);
             Assert.AreEqual(2, useNodesCounter);
             tree.Remove(3);
-            tree.Remove(1);
+            tree.Remove(5);
             Assert.AreEqual(0, useNodesCounter);
+        }
+
+        /// <summary>
+        /// Проверяет:
+        /// - ноды извлекаются в правильном порядке.
+        /// </summary>
+        [Test]
+        public void TryDequeueTest() {
+            _tree.Add(10);
+            _tree.Add(9);
+            _tree.Add(4);
+            _tree.Add(6);
+            _tree.Add(5);
+            _tree.Add(7);
+            _tree.Add(12);
+            _tree.Add(11);
+
+            int[] dequeueOrder = new int[] { 4, 5, 6, 7, 9, 10, 11, 12 };
+            int nodesCount = dequeueOrder.Length;
+
+            foreach (int expected in dequeueOrder) {
+                Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+                Assert.That(_tree.TryDequeue(out var node), Is.True);
+                Assert.That(node!.Data, Is.EqualTo(expected));
+            }
+            Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+            Assert.That(_tree.TryDequeue(out _), Is.False);
         }
 
 #region Utils
