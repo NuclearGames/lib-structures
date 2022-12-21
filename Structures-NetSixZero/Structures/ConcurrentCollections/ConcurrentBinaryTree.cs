@@ -6,8 +6,8 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
     public class ConcurrentBinaryTree<T> : BinaryTree<T> where T : IComparable<T> {
         private readonly RWLock _rwLock;
         
-        public ConcurrentBinaryTree(TimeSpan time) {
-            _rwLock = new RWLock(time);
+        public ConcurrentBinaryTree(RWLock.WaitTime time) {
+            _rwLock = new RWLock(time, LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -61,20 +61,10 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="resultNode">Узел, добавленный в случае успеха, или существующий, в случае провала</param>
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
         public override bool TryAdd(T data, out Node<T> resultNode) {
-            using (_rwLock.UpgradableReadLock()) {
+            using (_rwLock.WriteLock()) {
                 return base.TryAdd(data, out resultNode);
             }
         }
-
-        // /// <summary>
-        // /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
-        // /// </summary>
-        // /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        // private protected override bool TryAddRangeInternal(T[] sourceBuffer) {
-        //     using (_rwLock.UpgradableReadLock()) {
-        //         return base.TryAddRangeInternal(sourceBuffer);
-        //     }
-        // }
 
         /// <summary>
         /// Ищет минимальный элемент в дереве
@@ -171,42 +161,6 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
                 return base.IsBalanced();
             }
         }
-
-#region IAnyCollection
-
-        // /// <summary>
-        // /// Является ли дерево пустым
-        // /// </summary>
-        // public override bool IsEmpty {
-        //     get {
-        //         using (_rwLock.ReadLock()) {
-        //             return base.IsEmpty;
-        //         }
-        //     }
-        // }
-
-        // /// <summary>
-        // /// Любой элемент из коллекции
-        // /// </summary>
-        // public override T Any {
-        //     get {
-        //         using (_rwLock.ReadLock()) {
-        //             return base.Any;
-        //         }
-        //     }
-        // }
-
-        // /// <summary>
-        // /// Есть ли в коллекции хотя бы один элемент
-        // /// </summary>
-        // /// <param name="value">Любой элемент, если он существует в коллекции</param>
-        // public override bool TryGetAny(out T? value) {
-        //     using (_rwLock.ReadLock()) {
-        //         return base.TryGetAny(out value);
-        //     }
-        // }
-        
-#endregion
 
 #region ICollection
 

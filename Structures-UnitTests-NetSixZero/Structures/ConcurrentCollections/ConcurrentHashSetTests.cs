@@ -5,8 +5,7 @@ using Structures.NetSixZero.Structures.ConcurrentCollections;
 
 namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
     public class ConcurrentHashSetTests {
-        [TestCase(10000)]
-        [TestCase(10000)]
+        [Repeat(3)]
         [TestCase(10000)]
         public async Task AddElementsTest(int iterations) {
             var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1000));
@@ -27,8 +26,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             Assert.AreEqual(iterations * 2, set.Count);
         }
 
-        [TestCase(10000)]
-        [TestCase(10000)]
+        [Repeat(3)]
         [TestCase(10000)]
         public async Task AddRemoveElementsTest(int iterations) {
             var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1000));
@@ -55,8 +53,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             Assert.AreEqual(iterations, set.Count);
         }
         
-        [TestCase(10000)]
-        [TestCase(10000)]
+        [Repeat(3)]
         [TestCase(10000)]
         public async Task GetElementsTest(int iterations) {
             var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1));

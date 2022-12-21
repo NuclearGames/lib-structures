@@ -6,8 +6,8 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
     public class ConcurrentHashSet<T> : HashSet<T> {
         private readonly RWLock _rwLock;
 
-        public ConcurrentHashSet(TimeSpan time) {
-            _rwLock = new RWLock(time);
+        public ConcurrentHashSet(RWLock.WaitTime time) {
+            _rwLock = new RWLock(time, LockRecursionPolicy.NoRecursion);
         }
         
         public new bool TryGetValue(T equalValue, [MaybeNullWhen(false)] out T actualValue) {

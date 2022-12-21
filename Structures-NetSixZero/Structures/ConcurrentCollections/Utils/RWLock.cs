@@ -4,33 +4,31 @@
     /// </summary>
     public class RWLock : IDisposable {
         private readonly ReaderWriterLockSlim _lock;
-        private readonly TimeSpan _time;
+        private readonly WaitTime _time;
     
-        public RWLock(TimeSpan time, LockRecursionPolicy policy = LockRecursionPolicy.NoRecursion) {
-            _time = time;
+        public RWLock(WaitTime waitTime, LockRecursionPolicy policy) {
+            _time = waitTime;
             _lock = new ReaderWriterLockSlim(policy);
         }
 
         public ReadLockToken ReadLock() {
-            return new ReadLockToken(_lock, _time);
-        }
-        
-        public UpgradableReadLockToken UpgradableReadLock() {
-            return new UpgradableReadLockToken(_lock, _time);
+            return new(_lock, _time);
         }
 
         public WriteLockToken WriteLock() {
-            return new WriteLockToken(_lock, _time);
+            return new(_lock, _time);
         }
 
-#region Tokens
+        public void Dispose() {
+            _lock.Dispose();
+        }
 
         public readonly struct WriteLockToken : IDisposable {
             private readonly ReaderWriterLockSlim _rwLock;
 
-            public WriteLockToken(ReaderWriterLockSlim rwLock, TimeSpan time) {
+            public WriteLockToken(ReaderWriterLockSlim rwLock, int milliseconds) {
                 _rwLock = rwLock;
-                if (!_rwLock.TryEnterWriteLock(time)) {
+                if (!_rwLock.TryEnterWriteLock(milliseconds)) {
                     throw new TimeoutException("Enter write lock timeout");
                 }
             }
@@ -41,30 +39,13 @@
                 }
             }
         }
-        
-        public readonly struct UpgradableReadLockToken : IDisposable {
-            private readonly ReaderWriterLockSlim _rwLock;
-
-            public UpgradableReadLockToken(ReaderWriterLockSlim rwLock, TimeSpan time) {
-                _rwLock = rwLock;
-                if (!_rwLock.TryEnterUpgradeableReadLock(time)) {
-                    throw new TimeoutException("Enter upgradable read lock timeout");
-                }
-            }
-
-            public void Dispose() {
-                if (_rwLock.IsUpgradeableReadLockHeld) {
-                    _rwLock.ExitUpgradeableReadLock();
-                }
-            }
-        }
 
         public readonly struct ReadLockToken : IDisposable {
             private readonly ReaderWriterLockSlim _rwLock;
 
-            public ReadLockToken(ReaderWriterLockSlim rwLock, TimeSpan time) {
+            public ReadLockToken(ReaderWriterLockSlim rwLock, int milliseconds) {
                 _rwLock = rwLock;
-                if (!_rwLock.TryEnterReadLock(time)) {
+                if (!_rwLock.TryEnterReadLock(milliseconds)) {
                     throw new TimeoutException("Enter read lock timeout");
                 }
             }
@@ -75,8 +56,26 @@
                 }
             }
         }
+        
+        public readonly struct WaitTime {
+            private readonly int _milliseconds;
 
-#endregion
+            private WaitTime(int milliseconds) {
+                _milliseconds = milliseconds;
+            }
+
+            public static implicit operator WaitTime(int time) {
+                return new WaitTime(time);
+            }
+
+            public static implicit operator int(WaitTime waitTime) {
+                return waitTime._milliseconds;
+            }
+            
+            public static implicit operator WaitTime(TimeSpan waitTime) {
+                return new WaitTime((int) waitTime.TotalMilliseconds);
+            }
+        }
         
 #region Dispoable
 

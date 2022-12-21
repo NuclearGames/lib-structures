@@ -21,8 +21,8 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         
         private readonly RWLock _lock;
         
-        public ConcurrentList(TimeSpan time) {
-            _lock = new RWLock(time);
+        public ConcurrentList(RWLock.WaitTime time) {
+            _lock = new RWLock(time, LockRecursionPolicy.NoRecursion);
         }
 
         public new T this[int index] {
