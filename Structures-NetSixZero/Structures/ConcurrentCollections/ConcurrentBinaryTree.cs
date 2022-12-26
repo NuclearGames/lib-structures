@@ -7,7 +7,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         private readonly RWLock _rwLock;
         
         public ConcurrentBinaryTree(TimeSpan time) {
-            _rwLock = new RWLock(time, LockRecursionPolicy.NoRecursion);
+            _rwLock = new RWLock(time);
         }
 
         /// <summary>
@@ -17,6 +17,11 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
             get {
                 using (_rwLock.ReadLock()) {
                     return base.Root;
+                }
+            }
+            private protected set {
+                using (_rwLock.WriteLock()) {
+                    base.Root = value;
                 }
             }
         }
@@ -30,6 +35,23 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
                     return base.NodesCount;
                 }
             }
+            private protected set {
+                using (_rwLock.WriteLock()) {
+                    base.NodesCount = value;
+                }
+            }
+        }
+        
+        private protected override bool TrySetLeftValue(Node<T>? value, T data) {
+            using (_rwLock.WriteLock()) {
+                return base.TrySetLeftValue(value, data);
+            }
+        }
+        
+        private protected override bool TrySetRightValue(Node<T>? value, T data) {
+            using (_rwLock.WriteLock()) {
+                return base.TrySetRightValue(value, data);
+            }
         }
 
         /// <summary>
@@ -39,7 +61,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="resultNode">Узел, добавленный в случае успеха, или существующий, в случае провала</param>
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
         public override bool TryAdd(T data, out Node<T> resultNode) {
-            using (_rwLock.WriteLock()) {
+            using (_rwLock.UpgradableReadLock()) {
                 return base.TryAdd(data, out resultNode);
             }
         }
@@ -48,9 +70,9 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        public override bool TryAddRange(T[] sourceBuffer) {
+        private protected override bool TryAddRangeInternal(T[] sourceBuffer) {
             using (_rwLock.WriteLock()) {
-                return base.TryAddRange(sourceBuffer);
+                return base.TryAddRangeInternal(sourceBuffer);
             }
         }
 
@@ -152,37 +174,37 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 
 #region IAnyCollection
 
-        /// <summary>
-        /// Является ли дерево пустым
-        /// </summary>
-        public override bool IsEmpty {
-            get {
-                using (_rwLock.ReadLock()) {
-                    return base.IsEmpty;
-                }
-            }
-        }
+        // /// <summary>
+        // /// Является ли дерево пустым
+        // /// </summary>
+        // public override bool IsEmpty {
+        //     get {
+        //         using (_rwLock.ReadLock()) {
+        //             return base.IsEmpty;
+        //         }
+        //     }
+        // }
 
-        /// <summary>
-        /// Любой элемент из коллекции
-        /// </summary>
-        public override T Any {
-            get {
-                using (_rwLock.ReadLock()) {
-                    return base.Any;
-                }
-            }
-        }
+        // /// <summary>
+        // /// Любой элемент из коллекции
+        // /// </summary>
+        // public override T Any {
+        //     get {
+        //         using (_rwLock.ReadLock()) {
+        //             return base.Any;
+        //         }
+        //     }
+        // }
 
-        /// <summary>
-        /// Есть ли в коллекции хотя бы один элемент
-        /// </summary>
-        /// <param name="value">Любой элемент, если он существует в коллекции</param>
-        public override bool TryGetAny(out T? value) {
-            using (_rwLock.ReadLock()) {
-                return base.TryGetAny(out value);
-            }
-        }
+        // /// <summary>
+        // /// Есть ли в коллекции хотя бы один элемент
+        // /// </summary>
+        // /// <param name="value">Любой элемент, если он существует в коллекции</param>
+        // public override bool TryGetAny(out T? value) {
+        //     using (_rwLock.ReadLock()) {
+        //         return base.TryGetAny(out value);
+        //     }
+        // }
         
 #endregion
 
@@ -194,7 +216,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 
         public override void Add(T item) {
             if (!TryAdd(item, out var node)) {
-                throw new Exception($"Node with value '{item}' has been already exists!");
+                throw new ArgumentException($"Node with value '{item}' has been already exists!");
             }
         }
 

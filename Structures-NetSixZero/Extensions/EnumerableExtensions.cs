@@ -15,5 +15,18 @@
                 yield return i;
             }
         }
+        
+        /// <summary>
+        /// Перемешивает массив/лист.
+        /// </summary>
+        public static void Shuffle<T>(this IList<T> list) {
+            int n = list.Count;
+            var rnd = new Random();
+            while (n > 1) {
+                n--;
+                var k = rnd.Next(0, n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
     }
 }

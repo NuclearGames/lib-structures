@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Structures.NetSixZero.Structures.BST.Utils;
+using Structures.NetSixZero.Utils.Collections;
 using Structures.NetSixZero.Utils.Collections.Interfaces;
 
 
@@ -13,12 +14,12 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// Корневой узел дерева
         /// </summary>
-        public virtual Node<TData>? Root { get; private set; }
+        public virtual Node<TData>? Root { get; private protected set; }
 
         /// <summary>
         /// Кол-во узлов в дереве
         /// </summary>
-        public virtual int NodesCount { get; private set; }
+        public virtual int NodesCount { get; private protected set; }
 
         /// <summary>
         /// Селектор поля сравнения из объекта данные
@@ -33,6 +34,24 @@ namespace Structures.NetSixZero.Structures.BST {
             TryAddRange(sourceBuffer);
         }
 
+        private protected virtual bool TrySetLeftValue(Node<TData>? value, TData data) {
+            if (value is not { Left: null }) {
+                return false;
+            }
+            
+            value.Left = GetNode(data);
+            return true;
+        }
+        
+        private protected virtual bool TrySetRightValue(Node<TData>? value, TData data) {
+            if (value is not { Right: null }) {
+                return false;
+            }
+            
+            value.Right = GetNode(data);
+            return true;
+        }
+        
         /// <summary>
         /// Пытается добавить новый узел в дерево
         /// </summary>
@@ -50,67 +69,69 @@ namespace Structures.NetSixZero.Structures.BST {
             var node = Root!;
             TComparable dataValue = CompareFieldSelector(data);
 
-            bool SearchTree(Node<TData> currentNode, out Node<TData> resultNodeInternal) {
-                var compareResult = Compare(dataValue, currentNode.Data);
+            bool? result = null;
+            resultNode = default!;
+            
+            while (!result.HasValue) {
+                var compareResult = Compare(dataValue, node.Data);
                 switch (compareResult) {
                     case < 0:
-                        if (currentNode.Left == null) {
-                            currentNode.Left = GetNode(data);
-                            resultNodeInternal = currentNode.Left;
-                            return true;
+                        if (node.Left == null) {
+                            if (TrySetLeftValue(node, data)) {
+                                resultNode = node.Left!;
+                                result = true;
+                            } else {
+                                throw new ArgumentNullException();
+                            }
+                        } else {
+                            node = node.Left;
                         }
-                        return SearchTree(currentNode.Left, out resultNodeInternal);
+                        break;
+                    
                     case > 0:
-                        if (currentNode.Right == null) {
-                            currentNode.Right = GetNode(data);
-                            resultNodeInternal = currentNode.Right;
-                            return true;
+                        if (node.Right == null) {
+                            if (TrySetRightValue(node, data)) {
+                                resultNode = node.Right!;
+                                result = true;
+                            } else {
+                                throw new ArgumentNullException();
+                            }
+                        } else {
+                            node = node.Right;
                         }
-                        return SearchTree(currentNode.Right, out resultNodeInternal);
+                        break;
+
                     default:
-                        resultNodeInternal = currentNode;
-                        return false;   
+                        resultNode = node;
+                        result = false;
+                        break;
                 }
             }
             
-            var result = SearchTree(node, out resultNode);
-            if (result) {
+            if (result.Value) {
                 NodesCount++;
             }
-
-            return result;
+            
+            return result.Value;
         }
 
         /// <summary>
         /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        public virtual bool TryAddRange(TData[] sourceBuffer) {
-            bool anyAdd = false;
-            void AddElement(int pointIndex, int window) {
-                if (pointIndex < 0 || pointIndex >= sourceBuffer.Length) {
-                    return;
-                }
-                
-                anyAdd |= TryAdd(sourceBuffer[pointIndex], out _);
-                if (window == 1) {
-                    return;
-                }
-                
-                var newWindow = window / 2;
-                
-                if (window % 2 == 0) {
-                    AddElement(pointIndex + newWindow, newWindow);
-                    AddElement(pointIndex - newWindow, newWindow);
-                } else {
-                    anyAdd |= TryAdd(sourceBuffer[pointIndex + newWindow * 2], out _);
-                    anyAdd |= TryAdd(sourceBuffer[pointIndex -1], out _);
-                    
-                    AddElement(pointIndex + newWindow, newWindow);
-                    AddElement(pointIndex - newWindow - 1, newWindow);
-                }
-            }
+        public bool TryAddRange(TData[] sourceBuffer) {
+            return TryAddRangeInternal(sourceBuffer);
+        }
 
+        private readonly record struct AddRangeItem(int Index, int Window);
+        
+        /// <summary>
+        /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
+        /// </summary>
+        /// <returns>Был ли добавлен хотя бы один элемент</returns>
+        private protected virtual bool TryAddRangeInternal(TData[] sourceBuffer) {
+            bool anyAdd = false;
+            
             switch (sourceBuffer.Length) {
                 case 0:
                     return false;
@@ -118,7 +139,39 @@ namespace Structures.NetSixZero.Structures.BST {
                     anyAdd |= TryAdd(sourceBuffer[0], out _);
                     break;
                 default:
-                    AddElement(sourceBuffer.Length / 2, sourceBuffer.Length / 2);
+                    Span<AddRangeItem> numbers = stackalloc AddRangeItem[(int)Math.Log2(sourceBuffer.Length)];
+                    var stackBuffer = new AllocatedStack<AddRangeItem>(ref numbers);
+                    
+                    stackBuffer.Push(new AddRangeItem(sourceBuffer.Length / 2, sourceBuffer.Length / 2));
+
+                    int maxStackSize = 1;
+                    
+                    while (stackBuffer.TryPop(out var addRangeItem)) {
+                        if (addRangeItem.Index < 0 || addRangeItem.Index >= sourceBuffer.Length) {
+                            continue;
+                        }
+                        
+                        anyAdd |= TryAdd(sourceBuffer[addRangeItem.Index], out _);
+                        
+                        if (addRangeItem.Window == 1) {
+                            continue;
+                        }
+                        
+                        var newWindow = addRangeItem.Window / 2;
+                        if (addRangeItem.Window % 2 == 0) {
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index + newWindow, newWindow));
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index - newWindow, newWindow));
+                        } else {
+                            anyAdd |= TryAdd(sourceBuffer[addRangeItem.Index + newWindow * 2], out _);
+                            anyAdd |= TryAdd(sourceBuffer[addRangeItem.Index -1], out _);
+                            
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index + newWindow, newWindow));
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index - newWindow -1 , newWindow));
+                        }
+                        
+                        maxStackSize = Math.Max(maxStackSize, stackBuffer.Count);
+                    }
+                    
                     anyAdd |= TryAdd(sourceBuffer[0], out _);
                     if (sourceBuffer.Length % 2 == 1) {
                         anyAdd |= TryAdd(sourceBuffer[^1], out _);

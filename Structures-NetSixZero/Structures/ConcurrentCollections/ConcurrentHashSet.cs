@@ -7,7 +7,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         private readonly RWLock _rwLock;
 
         public ConcurrentHashSet(TimeSpan time) {
-            _rwLock = new RWLock(time, LockRecursionPolicy.NoRecursion);
+            _rwLock = new RWLock(time);
         }
         
         public new bool TryGetValue(T equalValue, [MaybeNullWhen(false)] out T actualValue) {
@@ -141,6 +141,14 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #endregion
 
 #region ICollection<T>
+        
+        public new int Count {
+            get {
+                using (_rwLock.ReadLock()) {
+                    return base.Count;
+                }
+            }
+        }
 
         public new bool Add(T item) {
             using (_rwLock.WriteLock()) {
@@ -163,14 +171,6 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         public new bool Remove(T item) {
             using (_rwLock.WriteLock()) {
                 return base.Remove(item);
-            }
-        }
-
-        public new int Count {
-            get {
-                using (_rwLock.ReadLock()) {
-                    return base.Count;
-                }
             }
         }
 

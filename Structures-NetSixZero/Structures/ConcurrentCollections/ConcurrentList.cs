@@ -3,8 +3,6 @@ using Structures.NetSixZero.Structures.ConcurrentCollections.Utils;
 
 namespace Structures.NetSixZero.Structures.ConcurrentCollections {
     public class ConcurrentList<T> : List<T> {
-        private readonly RWLock _lock;
-
         public new int Capacity {
             get {
                 using (_lock.ReadLock()) {
@@ -21,8 +19,10 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
             }
         }
         
+        private readonly RWLock _lock;
+        
         public ConcurrentList(TimeSpan time) {
-            _lock = new RWLock(time, LockRecursionPolicy.NoRecursion);
+            _lock = new RWLock(time);
         }
 
         public new T this[int index] {
