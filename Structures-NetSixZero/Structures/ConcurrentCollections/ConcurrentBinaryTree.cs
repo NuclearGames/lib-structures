@@ -66,15 +66,15 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
             }
         }
 
-        /// <summary>
-        /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
-        /// </summary>
-        /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        private protected override bool TryAddRangeInternal(T[] sourceBuffer) {
-            using (_rwLock.WriteLock()) {
-                return base.TryAddRangeInternal(sourceBuffer);
-            }
-        }
+        // /// <summary>
+        // /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
+        // /// </summary>
+        // /// <returns>Был ли добавлен хотя бы один элемент</returns>
+        // private protected override bool TryAddRangeInternal(T[] sourceBuffer) {
+        //     using (_rwLock.UpgradableReadLock()) {
+        //         return base.TryAddRangeInternal(sourceBuffer);
+        //     }
+        // }
 
         /// <summary>
         /// Ищет минимальный элемент в дереве
