@@ -13,7 +13,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <summary>
         /// Корневой узел дерева
         /// </summary>
-        public new Node<T>? Root {
+        public override Node<T>? Root {
             get {
                 using (_rwLock.ReadLock()) {
                     return base.Root;
@@ -24,7 +24,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <summary>
         /// Кол-во узлов в дереве
         /// </summary>
-        public new int NodesCount {
+        public override int NodesCount {
             get {
                 using (_rwLock.ReadLock()) {
                     return base.NodesCount;
@@ -38,7 +38,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="data">Данные</param>
         /// <param name="resultNode">Узел, добавленный в случае успеха, или существующий, в случае провала</param>
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
-        public new bool TryAdd(T data, out Node<T> resultNode) {
+        public override bool TryAdd(T data, out Node<T> resultNode) {
             using (_rwLock.WriteLock()) {
                 return base.TryAdd(data, out resultNode);
             }
@@ -48,7 +48,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        public new bool TryAddRange(T[] sourceBuffer) {
+        public override bool TryAddRange(T[] sourceBuffer) {
             using (_rwLock.WriteLock()) {
                 return base.TryAddRange(sourceBuffer);
             }
@@ -59,7 +59,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// </summary>
         /// <param name="resultNode">Узел дерева с минимальными данными</param>
         /// <returns>Найден такой узел (true) или нет (fasle)</returns>
-        public new bool TryFindMin(out Node<T>? resultNode) {
+        public override bool TryFindMin(out Node<T>? resultNode) {
             using (_rwLock.ReadLock()) {
                 return base.TryFindMin(out resultNode);
             }
@@ -70,7 +70,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// </summary>
         /// <param name="resultNode">Узел дерева с максимальными данными</param>
         /// <returns>Найден такой узел (true) или нет (fasle)</returns>
-        public new bool TryFindMax(out Node<T>? resultNode) {
+        public override bool TryFindMax(out Node<T>? resultNode) {
             using (_rwLock.ReadLock()) {
                 return base.TryFindMax(out resultNode);
             }
@@ -83,7 +83,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="resultNode">Узел с данными (если был найден) или null</param>
         /// <returns>True, если узел найден; False - если узел не найден</returns>
         /// <exception cref="ArgumentNullException">Недопустимая ошибка сравнения при обходе дерева</exception>
-        public new bool TryFind(T data, out Node<T>? resultNode) {
+        public override bool TryFind(T data, out Node<T>? resultNode) {
             using (_rwLock.ReadLock()) {
                 return base.TryFind(data, out resultNode);
             }
@@ -94,16 +94,27 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// </summary>
         /// <param name="data">Данные, необходмые удалить из дерева</param>
         /// <returns>True - данные найдены и удалить получилось. False - данные найдены не были </returns>
-        public new bool Remove(T data) {
+        public override bool Remove(T data) {
             using (_rwLock.WriteLock()) {
                 return base.Remove(data);
             }
         }
 
         /// <summary>
+        /// Пытается извлечь нод с минимальным значением.
+        /// </summary>
+        /// <param name="resultNode">Извлеченный нод или NULL.</param>
+        /// <returns>True - нод был извлечен; False - нет нод.</returns>
+        public override bool TryDequeue(out Node<T>? resultNode) {
+            using (_rwLock.WriteLock()) {
+                return base.TryDequeue(out resultNode);
+            }
+        }
+        
+        /// <summary>
         /// Очишает все дерево
         /// </summary>
-        public new void Clear() {
+        public override void Clear() {
             using (_rwLock.WriteLock()) {
                 base.Clear();
             }
@@ -114,7 +125,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// Возвращает минимальную глубину дерева
         /// </summary>
         /// <returns>Минимальная глубина дерева</returns>
-        public new int FindMinHeight() {
+        public override int FindMinHeight() {
             using (_rwLock.ReadLock()) {
                 return base.FindMinHeight();
             }
@@ -124,7 +135,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// Возвращает максимальную глубину дерева
         /// </summary>
         /// <returns>максимальную глубина дерева</returns>
-        public new int FindMaxHeight() {
+        public override int FindMaxHeight() {
             using (_rwLock.ReadLock()) {
                 return base.FindMaxHeight();
             }
@@ -133,7 +144,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <summary>
         /// сбалансировано ли дерево?
         /// </summary>
-        public new bool IsBalanced() {
+        public override bool IsBalanced() {
             using (_rwLock.ReadLock()) {
                 return base.IsBalanced();
             }
@@ -144,7 +155,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <summary>
         /// Является ли дерево пустым
         /// </summary>
-        public new bool IsEmpty {
+        public override bool IsEmpty {
             get {
                 using (_rwLock.ReadLock()) {
                     return base.IsEmpty;
@@ -155,7 +166,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <summary>
         /// Любой элемент из коллекции
         /// </summary>
-        public new T Any {
+        public override T Any {
             get {
                 using (_rwLock.ReadLock()) {
                     return base.Any;
@@ -167,7 +178,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// Есть ли в коллекции хотя бы один элемент
         /// </summary>
         /// <param name="value">Любой элемент, если он существует в коллекции</param>
-        public new bool TryGetAny(out T? value) {
+        public override bool TryGetAny(out T? value) {
             using (_rwLock.ReadLock()) {
                 return base.TryGetAny(out value);
             }
@@ -177,23 +188,21 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 
 #region ICollection
 
-        public new int Count => NodesCount;
+        public override int Count => NodesCount;
 
-        public new bool IsReadOnly => false;
+        public override bool IsReadOnly => false;
 
-        public new void Add(T item) {
-            using (_rwLock.WriteLock()) {
-                base.Add(item);
+        public override void Add(T item) {
+            if (!TryAdd(item, out var node)) {
+                throw new Exception($"Node with value '{item}' has been already exists!");
             }
         }
 
-        public new bool Contains(T item) {
-            using (_rwLock.ReadLock()) {
-                return base.Contains(item);
-            }
+        public override bool Contains(T item) {
+            return TryFind(item, out var _);
         }
 
-        public new void CopyTo(T[] array, int arrayIndex) {
+        public override void CopyTo(T[] array, int arrayIndex) {
             using (_rwLock.ReadLock()) {
                 base.CopyTo(array, arrayIndex);
             }
@@ -203,7 +212,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 
 #region Enumerable
 
-        public new IEnumerator<T> GetEnumerator() {
+        public override IEnumerator<T> GetEnumerator() {
             using (_rwLock.ReadLock()) {
                 return base.GetEnumerator();
             }
@@ -214,7 +223,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region Dispose
 
         ~ConcurrentBinaryTree() {
-            _rwLock?.Dispose();
+            _rwLock.Dispose();
         }
 
 #endregion

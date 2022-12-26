@@ -13,12 +13,12 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// Корневой узел дерева
         /// </summary>
-        public Node<TData>? Root { get; private set; }
+        public virtual Node<TData>? Root { get; private set; }
 
         /// <summary>
         /// Кол-во узлов в дереве
         /// </summary>
-        public int NodesCount { get; private set; }
+        public virtual int NodesCount { get; private set; }
 
         /// <summary>
         /// Селектор поля сравнения из объекта данные
@@ -39,7 +39,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <param name="data">Данные</param>
         /// <param name="resultNode">Узел, добавленный в случае успеха, или существующий, в случае провала</param>
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
-        public bool TryAdd(TData data, out Node<TData> resultNode) {
+        public virtual bool TryAdd(TData data, out Node<TData> resultNode) {
             if (IsEmpty) {
                 Root = GetNode(data);
                 resultNode = Root;
@@ -85,7 +85,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        public bool TryAddRange(TData[] sourceBuffer) {
+        public virtual bool TryAddRange(TData[] sourceBuffer) {
             bool anyAdd = false;
             void AddElement(int pointIndex, int window) {
                 if (pointIndex < 0 || pointIndex >= sourceBuffer.Length) {
@@ -133,7 +133,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// </summary>
         /// <param name="resultNode">Узел дерева с минимальными данными</param>
         /// <returns>Найден такой узел (true) или нет (fasle)</returns>
-        public bool TryFindMin(out Node<TData>? resultNode) {
+        public virtual bool TryFindMin(out Node<TData>? resultNode) {
             if (IsEmpty) {
                 resultNode = null;
                 return false;
@@ -152,7 +152,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// </summary>
         /// <param name="resultNode">Узел дерева с максимальными данными</param>
         /// <returns>Найден такой узел (true) или нет (fasle)</returns>
-        public bool TryFindMax(out Node<TData>? resultNode) {
+        public virtual bool TryFindMax(out Node<TData>? resultNode) {
             if (IsEmpty) {
                 resultNode = null;
                 return false;
@@ -173,7 +173,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <param name="resultNode">Узел с данными (если был найден) или null</param>
         /// <returns>True, если узел найден; False - если узел не найден</returns>
         /// <exception cref="ArgumentNullException">Недопустимая ошибка сравнения при обходе дерева</exception>
-        public bool TryFind(TData data, out Node<TData>? resultNode) {
+        public virtual bool TryFind(TData data, out Node<TData>? resultNode) {
             if (IsEmpty) {
                 resultNode = null;
                 return false;
@@ -206,7 +206,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// </summary>
         /// <param name="data">Данные, необходмые удалить из дерева</param>
         /// <returns>True - данные найдены и удалить получилось. False - данные найдены не были </returns>
-        public bool Remove(TData data) {
+        public virtual bool Remove(TData data) {
             bool TryRemoveInternal(Node<TData>? currentNode, TData internalData, out Node<TData>? internalResultNode) {
                 if (currentNode == null) {
                     internalResultNode = null;
@@ -286,7 +286,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// </summary>
         /// <param name="resultNode">Извлеченный нод или NULL.</param>
         /// <returns>True - нод был извлечен; False - нет нод.</returns>
-        public bool TryDequeue(out Node<TData>? resultNode) {
+        public virtual bool TryDequeue(out Node<TData>? resultNode) {
             if (IsEmpty) {
                 resultNode = null;
                 return false;
@@ -324,7 +324,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// Очишает все дерево
         /// </summary>
-        public void Clear() {
+        public virtual void Clear() {
             Root = null;
             NodesCount = 0;
         }
@@ -334,7 +334,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// Возвращает минимальную глубину дерева
         /// </summary>
         /// <returns>Минимальная глубина дерева</returns>
-        public int FindMinHeight() {
+        public virtual int FindMinHeight() {
             int FindMinHeightInternal(Node<TData>? node) {
                 if (node == null) {
                     return -1;
@@ -354,7 +354,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// Возвращает максимальную глубину дерева
         /// </summary>
         /// <returns>максимальную глубина дерева</returns>
-        public int FindMaxHeight() {
+        public virtual int FindMaxHeight() {
             int FindMaxHeightInternal(Node<TData>? node) {
                 if (node == null) {
                     return -1;
@@ -373,7 +373,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// сбалансировано ли дерево?
         /// </summary>
-        public bool IsBalanced() => FindMinHeight() >= FindMaxHeight() - 1;
+        public virtual bool IsBalanced() => FindMinHeight() >= FindMaxHeight() - 1;
 
         protected virtual Node<TData> GetNode(TData data) {
             return new Node<TData>(data);
@@ -386,12 +386,12 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// Является ли дерево пустым
         /// </summary>
-        public bool IsEmpty => NodesCount == 0;
+        public virtual bool IsEmpty => NodesCount == 0;
 
         /// <summary>
         /// Любой элемент из коллекции
         /// </summary>
-        public TData Any {
+        public virtual TData Any {
             get {
                 if (IsEmpty) {
                     throw new NullReferenceException("Tree is empty!");
@@ -405,7 +405,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// Есть ли в коллекции хотя бы один элемент
         /// </summary>
         /// <param name="value">Любой элемент, если он существует в коллекции</param>
-        public bool TryGetAny(out TData? value) {
+        public virtual bool TryGetAny(out TData? value) {
             if (NodesCount == 0) {
                 value = default;
                 return false;   
@@ -431,21 +431,21 @@ namespace Structures.NetSixZero.Structures.BST {
         
 #region ICollection
 
-        public int Count => NodesCount;
+        public virtual int Count => NodesCount;
 
-        public bool IsReadOnly => false;
+        public virtual bool IsReadOnly => false;
 
-        public void Add(TData item) {
+        public virtual void Add(TData item) {
             if (!TryAdd(item, out var node)) {
                 throw new Exception($"Node with value '{item}' has been already exists!");
             }
         }
 
-        public bool Contains(TData item) {
+        public virtual bool Contains(TData item) {
             return TryFind(item, out var _);
         }
 
-        public void CopyTo(TData[] array, int arrayIndex) {
+        public virtual void CopyTo(TData[] array, int arrayIndex) {
             if (array.Length < Count + arrayIndex) {
                 throw new ArgumentOutOfRangeException(nameof(array), $"Invalid array size: it's length should be >= '{Count + arrayIndex}'");
             }
@@ -461,7 +461,7 @@ namespace Structures.NetSixZero.Structures.BST {
 
 #region Enumerable
 
-        public IEnumerator<TData> GetEnumerator() {
+        public virtual IEnumerator<TData> GetEnumerator() {
             if (IsEmpty) {
                 yield break;
             }
