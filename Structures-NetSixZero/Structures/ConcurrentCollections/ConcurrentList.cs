@@ -101,7 +101,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region Utils
 
         public new int EnsureCapacity(int capacity) {
-            using (_lock.ReadLock()) {
+            using (_lock.WriteLock()) {
                 return base.EnsureCapacity(capacity);
             }
         }
@@ -371,7 +371,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
 #region Dispose
 
         ~ConcurrentList() {
-            _lock?.Dispose();
+            _lock.Dispose();
         }
 
 #endregion

@@ -19,10 +19,6 @@
             return new(_lock, _time);
         }
 
-        public void Dispose() {
-            _lock.Dispose();
-        }
-
         public readonly struct WriteLockToken : IDisposable {
             private readonly ReaderWriterLockSlim _rwLock;
 
@@ -59,7 +55,8 @@
         
         public readonly struct WaitTime {
             private readonly int _milliseconds;
-
+            
+            /// <param name="milliseconds">Время ожидания в миллисекундах (-1 для бесконечного времени)</param>
             private WaitTime(int milliseconds) {
                 _milliseconds = milliseconds;
             }

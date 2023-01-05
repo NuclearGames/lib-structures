@@ -29,8 +29,6 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             
             Assert.AreEqual(iterations, tree.Count);
             Assert.AreEqual(iterations, intersections);
-            
-            //AssertNodesDistribution(tree);
         }
         
         [TestCase(1000)]
@@ -51,8 +49,6 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
             await Task.WhenAll(task1, task2);
             Assert.AreEqual(iterations * 2, tree.Count);
-            
-            //AssertNodesDistribution(tree, iterations);
         }
         
         [TestCase(1000)]
@@ -78,8 +74,6 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             AssertNodesDistribution(tree);
         }
 
-        
-        
         [TestCase(1000)]
         [TestCase(100000)]
         public async Task AddRangeNonIntersectedElementsTest(int iterations) {
@@ -101,58 +95,6 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
             AssertNodesDistribution(tree, iterations);
         }
-
-        // [TestCase(1000), Repeat(100)]
-        // public async Task RemoveElementsTest(int iterations) {
-        //     var tree = new ConcurrentBinaryTree<ConcurrentData>(TimeSpan.FromMilliseconds(1000));
-        //
-        //     for (int i = 0; i < iterations; i++) {
-        //         tree.Add(i);
-        //     }
-        //
-        //     Assert.AreEqual(iterations, tree.Count);
-        //
-        //     var task1 = Task.Factory.StartNew(() => {
-        //         for (int i = 0; i < iterations; i++) {
-        //             tree.Remove(i);
-        //         }
-        //     });
-        //
-        //     var task2 = Task.Factory.StartNew(() => {
-        //         for (int i = iterations; i < iterations * 2; i++) {
-        //             tree.Add(i);
-        //         }
-        //     });
-        //
-        //     await Task.WhenAll(task1, task2);
-        //     Assert.AreEqual(iterations, tree.Count);
-        // }
-        //
-        // [TestCase(1000), Repeat(100)]
-        // public async Task GetElementsTest(int iterations) {
-        //     var tree = new ConcurrentBinaryTree<int>(TimeSpan.FromMilliseconds(1));
-        //
-        //     for (int i = 0; i < iterations; i++) {
-        //         tree.Add(i);
-        //     }
-        //
-        //     Assert.AreEqual(iterations, tree.Count);
-        //     
-        //     var task1 = Task.Factory.StartNew(() => {
-        //         for (int i = 0; i < iterations; i++) {
-        //             Assert.IsTrue(tree.Contains(i));
-        //         }
-        //     });
-        //
-        //     var task2 = Task.Factory.StartNew(() => {
-        //         for (int i = 0; i < iterations; i++) {
-        //             Assert.IsTrue(tree.Contains(i));
-        //         }
-        //     });
-        //
-        //     await Task.WhenAll(task1, task2);
-        // }
-        //
 
 #region Utils
 
