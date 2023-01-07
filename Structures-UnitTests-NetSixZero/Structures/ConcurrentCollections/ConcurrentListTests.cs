@@ -368,7 +368,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test]
         public async Task FindIndexTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(-1);
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -468,7 +468,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test]
         public async Task TrueForAllTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(-1);
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -593,7 +593,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test, Repeat(10)]
         public async Task RemoveRangeTest([Values(10, 100, 1000)] int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(-1);
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
