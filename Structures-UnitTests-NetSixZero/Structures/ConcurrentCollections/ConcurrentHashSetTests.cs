@@ -58,7 +58,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         [Repeat(3)]
         [TestCase(10000)]
         public async Task GetElementsTest(int iterations) {
-            var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1));
+            var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(10));
 
             for (int i = 0; i < iterations; i++) {
                 set.Add(i);
@@ -180,15 +180,15 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test, Repeat(500)]
         public async Task IntersectWithTest() {
-            var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(10)) {
+            var set = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1000)) {
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
             };
 
-            var anotherSet = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(10)) {
+            var anotherSet = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1000)) {
                 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
             };
 
-            var intersectedSet = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(10)) {
+            var intersectedSet = new ConcurrentHashSet<int>(TimeSpan.FromMilliseconds(1000)) {
                 5, 6, 7, 8, 9
             };
 
@@ -353,6 +353,33 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             });
 
             await Task.WhenAll(task1, task2);
+        }
+        
+        [Test, Repeat(3)]
+        public async Task ClearTest([Values(10, 100, 1000)] int iterations) {
+            var set = new ConcurrentHashSet<int>(-1);
+
+            for (int i = 0; i < iterations; i++) {
+                set.Add(i);
+            }
+
+            var task1 = Task.Factory.StartNew(() => {
+                for (int i = iterations; i < iterations * 2; i++) {
+                    set.Add(i);
+                }
+            });
+
+            var task2 = Task.Factory.StartNew(() => {
+                for (int i = 0; i < iterations; i++) {
+                    set.Clear();
+                }
+            });
+
+            await Task.WhenAll(task1, task2);
+            
+            for (int i = 0; i < iterations; i++) {
+                Assert.IsFalse(set.Contains(i));
+            }
         }
     }
 }

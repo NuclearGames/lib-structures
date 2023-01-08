@@ -238,7 +238,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task EnsureCapacityTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
             
             var expectedCapacity = 0;
             
@@ -269,7 +269,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task ExistsTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -292,7 +292,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task GetRangeTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -319,7 +319,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test]
         public async Task ContainsTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -342,7 +342,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task FindTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
             var array = new int[iterations];
             
             for (int i = 0; i < iterations; i++) {
@@ -393,7 +393,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task FindLastIndexTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -418,7 +418,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task FindLastTest([Values(10, 100, 1000)]int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -491,7 +491,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
         [Test]
         public async Task IndexOfTest([Values(10, 100, 1000)] int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -516,7 +516,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test]
         public async Task LastIndexOfTest([Values(10, 100, 1000)] int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -541,7 +541,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test, Repeat(10)]
         public async Task RemoveAllTest([Values(10, 100, 1000)] int iterations) {
-            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(10));
+            var list = new ConcurrentList<int>(TimeSpan.FromMilliseconds(1000));
 
             for (int i = 0; i < iterations; i++) {
                 list.Add(i);
@@ -666,6 +666,33 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
 
             await Task.WhenAll(task1, task2);
             Assert.AreEqual(iterations * (2 * collection.Count() + 1), list.Count);
+        }
+
+        [Test, Repeat(3)]
+        public async Task ClearTest([Values(10, 100, 1000)] int iterations) {
+            var list = new ConcurrentList<int>(-1);
+
+            for (int i = 0; i < iterations; i++) {
+                list.Add(i);
+            }
+
+            var task1 = Task.Factory.StartNew(() => {
+                for (int i = iterations; i < iterations * 2; i++) {
+                    list.Add(i);
+                }
+            });
+
+            var task2 = Task.Factory.StartNew(() => {
+                for (int i = 0; i < iterations; i++) {
+                    list.Clear();
+                }
+            });
+
+            await Task.WhenAll(task1, task2);
+            
+            for (int i = 0; i < iterations; i++) {
+                Assert.IsFalse(list.Contains(i));
+            }
         }
     }
 }

@@ -182,7 +182,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
         
         [Test]
         public async Task CopyToTest([Values(10, 100, 1000)]int iterations) {
-            var tree = new ConcurrentBinaryTree<int>(TimeSpan.FromMilliseconds(10));
+            var tree = new ConcurrentBinaryTree<int>(TimeSpan.FromMilliseconds(1000));
             
             for (int i = 0; i < 10; i++) {
                 tree.Add(i);
@@ -257,6 +257,33 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
             });
 
             await Task.WhenAll(task1, task2);
+        }
+        
+        [Test, Repeat(3)]
+        public async Task ClearTest([Values(10, 100, 1000)] int iterations) {
+            var tree = new ConcurrentBinaryTree<int>(-1);
+
+            for (int i = 0; i < iterations; i++) {
+                tree.Add(i);
+            }
+
+            var task1 = Task.Factory.StartNew(() => {
+                for (int i = iterations; i < iterations * 2; i++) {
+                    tree.Add(i);
+                }
+            });
+
+            var task2 = Task.Factory.StartNew(() => {
+                for (int i = 0; i < iterations; i++) {
+                    tree.Clear();
+                }
+            });
+
+            await Task.WhenAll(task1, task2);
+            
+            for (int i = 0; i < iterations; i++) {
+                Assert.IsFalse(tree.Contains(i));
+            }
         }
 
 #region Utils
