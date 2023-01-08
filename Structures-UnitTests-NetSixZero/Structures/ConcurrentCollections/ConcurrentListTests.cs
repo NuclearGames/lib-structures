@@ -694,5 +694,37 @@ namespace Structures_UnitTests_NetSixZero.Structures.ConcurrentCollections {
                 Assert.IsFalse(list.Contains(i));
             }
         }
+        
+        [Test, Repeat(3)]
+        public async Task ConvertAll([Values(10, 100, 1000)] int iterations) {
+            var list = new ConcurrentList<int>(-1);
+
+            for (int i = 0; i < iterations; i++) {
+                list.Add(i);
+            }
+
+            var task1 = Task.Factory.StartNew(() => {
+                for (int i = iterations; i < iterations * 2; i++) {
+                    list.Add(i);
+                }
+            });
+
+            int ConvertFunction(int input) {
+                return input + 1;
+            }
+
+            List<int> convertedList = new();
+            var task2 = Task.Factory.StartNew(() => {
+                for (int i = 0; i < iterations; i++) {
+                    convertedList = list.ConvertAll(ConvertFunction);
+                }
+            });
+
+            await Task.WhenAll(task1, task2);
+            
+            for (int i = 0; i < iterations; i++) {
+                Assert.AreEqual(i + 1, convertedList[i]);
+            }
+        }
     }
 }
