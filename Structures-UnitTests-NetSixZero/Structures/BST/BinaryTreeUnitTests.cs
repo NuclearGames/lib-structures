@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using Structures.NetSixZero.Extensions;
 using Structures.NetSixZero.Structures.BST;
 using Structures.NetSixZero.Structures.BST.Utils;
 
@@ -44,7 +45,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
         }
         
         [Test]
-        public void SuccessfulAddRange([Values(10, 11, 1000, 1001)]int count) {
+        public void SuccessfulAddRange([Values(10, 11, 1000, 1001, 100000, 100000000)]int count) {
             var sourceBuffer = Enumerable.Range(0, count).ToArray();
             var newTree = new BinaryTree<int>(sourceBuffer);
             Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
@@ -55,6 +56,15 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
             Assert.AreEqual(true, addResult);
             Assert.AreEqual(count + count, newTree.NodesCount);
             Assert.AreEqual(count + count, newTree.ToArray().Length);
+        }
+        
+        [Test]
+        public void AddRangeShuffled([Values(10, 11, 1000, 1001, 100000, 10000000)]int count) {
+            var sourceBuffer = Enumerable.Range(0, count).ToArray();
+            sourceBuffer.Shuffle();
+            var newTree = new BinaryTree<int>(sourceBuffer);
+            Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
+            Assert.AreEqual(sourceBuffer.Length, newTree.ToArray().Length);
         }
         
         [TestCase(20)]
