@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Structures.NetSixZero.Structures.BST.Utils;
 using Structures.NetSixZero.Utils.Collections;
 using Structures.NetSixZero.Utils.Collections.Interfaces;
@@ -129,7 +130,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// Добавляет массив элементов. Построено на предположении, что <paramref name="sourceBuffer"/> упорядочен по возрастнию. 
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
-        private protected virtual bool TryAddRangeInternal(TData[] sourceBuffer) {
+        private bool TryAddRangeInternal(TData[] sourceBuffer) {
             bool anyAdd = false;
             
             switch (sourceBuffer.Length) {
@@ -226,7 +227,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <param name="resultNode">Узел с данными (если был найден) или null</param>
         /// <returns>True, если узел найден; False - если узел не найден</returns>
         /// <exception cref="ArgumentNullException">Недопустимая ошибка сравнения при обходе дерева</exception>
-        public virtual bool TryFind(TData data, out Node<TData>? resultNode) {
+        public virtual bool TryFind(TData data, [MaybeNullWhen(false)] out Node<TData> resultNode) {
             if (IsEmpty) {
                 resultNode = null;
                 return false;
@@ -333,6 +334,88 @@ namespace Structures.NetSixZero.Structures.BST {
             
             return result;
         }
+
+        /// <summary>
+        /// Пытается удалить узел дерева по данным
+        /// </summary>
+        /// <param name="data">Данные, необходмые удалить из дерева</param>
+        /// <param name="removeNode"></param>
+        /// <returns>True - данные найдены и удалить получилось. False - данные найдены не были </returns>
+        public virtual bool Remove(TData data, [MaybeNullWhen(false)] out Node<TData> removeNode) {
+            bool result = false;
+            Node<TData>? temp = Root, parent = null;
+            removeNode = null;
+
+            // Проверяем, пустое ли дерево
+            if (temp == null) {
+                return false;
+            }
+            
+            var compareValue = CompareFieldSelector(data);
+            
+            while (temp != null) {
+                int compareResult = Compare(compareValue, temp.Data);
+                if (compareResult > 0) {
+                    parent = temp;
+                    temp = temp.Right;
+                } else if (compareResult < 0) {
+                    parent = temp;
+                    temp = temp.Left;
+                } else {
+                    if (temp.Left == null && temp.Right == null) {
+                        if(parent != null) {
+                            if (parent.Left == temp) {
+                                parent.Left = null;
+                            } else {
+                                parent.Right = null;
+                            }
+                        }
+				
+                        removeNode = temp;
+                    } else if (temp.Left == null || temp.Right == null) {
+                        if (temp.Left != null) {
+                            if (parent == null) {
+                                Root = temp.Left;
+                            } else {
+                                parent.Left = temp.Left;
+                            }
+                        } else {
+                            if (parent == null) {
+                                Root = temp.Left;
+                            } else {
+                                parent.Right = temp.Right;
+                            }
+                        }
+                        
+                        if(parent != null) {
+                            
+                        }
+                
+                        removeNode = temp;
+                    } else {
+                        var temp2 = temp.Right;
+                        while (temp2.Left != null) {
+                            temp2 = temp2.Left;
+                        }
+                        (temp.Data, temp2.Data) = (temp2.Data, temp.Data);
+				
+                        removeNode = temp2;
+                    }
+                    
+                    ReleaseNode(removeNode);
+                    result = true;
+			
+                    break;
+                }
+            }
+            
+            if (result) {
+                NodesCount--;
+            }
+	
+            return result;
+        }
+        
 
         /// <summary>
         /// Пытается извлечь нод с минимальным значением.

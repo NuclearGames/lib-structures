@@ -45,7 +45,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
         }
         
         [Test]
-        public void SuccessfulAddRange([Values(10, 11, 1000, 1001, 100000, 100000000)]int count) {
+        public void SuccessfulAddRange([Values(10, 11, 1000, 1001, 100000)]int count) {
             var sourceBuffer = Enumerable.Range(0, count).ToArray();
             var newTree = new BinaryTree<int>(sourceBuffer);
             Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);

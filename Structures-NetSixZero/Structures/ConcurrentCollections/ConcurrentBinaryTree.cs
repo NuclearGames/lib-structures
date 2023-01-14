@@ -1,4 +1,5 @@
-﻿using Structures.NetSixZero.Structures.BST;
+﻿using System.Diagnostics.CodeAnalysis;
+using Structures.NetSixZero.Structures.BST;
 using Structures.NetSixZero.Structures.BST.Utils;
 using Structures.NetSixZero.Structures.ConcurrentCollections.Utils;
 
@@ -105,7 +106,7 @@ namespace Structures.NetSixZero.Structures.ConcurrentCollections {
         /// <param name="resultNode">Узел с данными (если был найден) или null</param>
         /// <returns>True, если узел найден; False - если узел не найден</returns>
         /// <exception cref="ArgumentNullException">Недопустимая ошибка сравнения при обходе дерева</exception>
-        public override bool TryFind(T data, out Node<T>? resultNode) {
+        public override bool TryFind(T data, [MaybeNullWhen(false)] out Node<T> resultNode) {
             using (_rwLock.ReadLock()) {
                 return base.TryFind(data, out resultNode);
             }
