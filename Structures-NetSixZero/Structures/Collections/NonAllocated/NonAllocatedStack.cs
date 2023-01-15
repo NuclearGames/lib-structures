@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Structures.NetSixZero.Utils.Collections {
-    public ref struct AllocatedStack<T> where T : unmanaged {
+namespace Structures.NetSixZero.Structures.Collections.NonAllocated {
+    public ref struct NonAllocatedStack<T> where T : unmanaged {
         public int Count => _count;
         
         private readonly Span<T> _buffer;
         private int _count;
 
-        public AllocatedStack(ref Span<T> span) {
+        public NonAllocatedStack(ref Span<T> span) {
             _buffer = span;
             _count = 0;
         }
@@ -16,10 +16,7 @@ namespace Structures.NetSixZero.Utils.Collections {
         /// <exception cref="T:System.InvalidOperationException">The <see cref="T:System.Collections.Generic.Stack`1" /> is empty.</exception>
         /// <returns>The object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />.</returns>
         public ref T Peek() {
-            if (_count == 0) {
-                ThrowForOverFilledStack();
-            }
-
+            AssertCanPop();
             return ref _buffer[_count - 1];
         }
 
@@ -27,10 +24,7 @@ namespace Structures.NetSixZero.Utils.Collections {
         /// <exception cref="T:System.ArgumentOutOfRangeException">The <see cref="T:System.Collections.Generic.Stack`1" /> is empty.</exception>
         /// <returns>The object removed from the top of the <see cref="T:System.Collections.Generic.Stack`1" />.</returns>
         public ref T Pop() {
-            if (_count == 0) {
-                ThrowForOverFilledStack();
-            }
-
+            AssertCanPop();
             return ref _buffer[--_count];
         }
 
@@ -39,15 +33,13 @@ namespace Structures.NetSixZero.Utils.Collections {
         /// <returns>
         /// <see langword="true" /> if there is an object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />; <see langword="false" /> if the <see cref="T:System.Collections.Generic.Stack`1" /> is empty.</returns>
         public bool TryPeek([MaybeNullWhen(false)] out T result) {
-            if (_count == 0) {
-                result = default(T);
-
+            try {
+                result = Peek();
+                return true;
+            } catch (ArgumentOutOfRangeException _) {
+                result = default;
                 return false;
             }
-
-            result = _buffer[_count - 1];
-
-            return true;
         }
 
         /// <summary>Returns a value that indicates whether there is an object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />, and if one is present, copies it to the <paramref name="result" /> parameter, and removes it from the <see cref="T:System.Collections.Generic.Stack`1" />.</summary>
@@ -55,37 +47,43 @@ namespace Structures.NetSixZero.Utils.Collections {
         /// <returns>
         /// <see langword="true" /> if there is an object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />; <see langword="false" /> if the <see cref="T:System.Collections.Generic.Stack`1" /> is empty.</returns>
         public bool TryPop([MaybeNullWhen(false)] out T result) {
-            if (_count == 0) {
-                result = default(T);
-
+            try {
+                result = Pop();
+                return true;
+            } catch (ArgumentOutOfRangeException _) {
+                result = default;
                 return false;
             }
-
-            result = _buffer[--_count];
-
-            return true;
         }
 
         /// <summary>Inserts an object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />.</summary>
         /// <param name="item">The object to push onto the <see cref="T:System.Collections.Generic.Stack`1" />. The value can be <see langword="null" /> for reference types.</param>
         public void Push(T item) {
-            if (_count == _buffer.Length) {
-                ThrowForOverFilledStack();
-            }
-
+            AssertCanPush();
             _buffer[_count++] = item;
         }
         
         /// <summary>Inserts an object at the top of the <see cref="T:System.Collections.Generic.Stack`1" />.</summary>
         /// <param name="item">The object to push onto the <see cref="T:System.Collections.Generic.Stack`1" />. The value can be <see langword="null" /> for reference types.</param>
         public void Push(ref T item) {
-            if (_count == _buffer.Length) {
-                ThrowForOverFilledStack();
-            }
-
+            AssertCanPush();
             _buffer[_count++] = item;
         }
 
-        private static void ThrowForOverFilledStack() => throw new ArgumentOutOfRangeException();
+#region MyRegion
+
+        private void AssertCanPush() {
+            if (_count >= _buffer.Length) {
+                throw new ArgumentOutOfRangeException(nameof(_buffer), "Buffer is overfilled!");
+            }
+        }
+
+        private void AssertCanPop() {
+            if (_count == 0) {
+                throw new ArgumentOutOfRangeException(nameof(_buffer), "Buffer is empty!");
+            }
+        }
+
+#endregion
     }
 }

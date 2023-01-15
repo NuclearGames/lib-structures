@@ -2,6 +2,7 @@
 using BenchmarkDotNet.Attributes;
 using JetBrains.dotMemoryUnit;
 using NUnit.Framework;
+using Structures.NetSixZero.Structures.Collections.NonAllocated;
 using Structures.NetSixZero.Utils.Collections;
 
 namespace Structures_UnitTests_NetSixZero.Utils.Collections; 
@@ -14,7 +15,7 @@ internal sealed class AllocatedStackUnitTest {
     [TestCase(1000)]
     public void TestMemoryUsage(int size) {
         Span<TestStruct> span = stackalloc TestStruct[size];
-        var stack = new AllocatedStack<TestStruct>(ref span);
+        var stack = new NonAllocatedStack<TestStruct>(ref span);
 
         TestStruct value = default;
         for (int i = 0; i < size; i++) {

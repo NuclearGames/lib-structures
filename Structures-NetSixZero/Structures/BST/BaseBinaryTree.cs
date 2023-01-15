@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using Structures.NetSixZero.Structures.BST.Utils;
+using Structures.NetSixZero.Structures.Collections.NonAllocated;
 using Structures.NetSixZero.Utils.Collections;
 using Structures.NetSixZero.Utils.Collections.Interfaces;
 
@@ -120,7 +121,7 @@ namespace Structures.NetSixZero.Structures.BST {
                     break;
                 default:
                     Span<AddRangeItem> numbers = stackalloc AddRangeItem[(int)Math.Log2(sourceBuffer.Length)];
-                    var stackBuffer = new AllocatedStack<AddRangeItem>(ref numbers);
+                    var stackBuffer = new NonAllocatedStack<AddRangeItem>(ref numbers);
 
                     stackBuffer.Push(new AddRangeItem(sourceBuffer.Length / 2, sourceBuffer.Length / 2));
 

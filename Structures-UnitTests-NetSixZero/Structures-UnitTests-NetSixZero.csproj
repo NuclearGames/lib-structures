@@ -8,6 +8,8 @@
         <IsPackable>false</IsPackable>
 
         <AssemblyName>Structures-UnitTests-NetSixZero</AssemblyName>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
