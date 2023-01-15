@@ -35,8 +35,9 @@ namespace Structures.NetSixZero.Utils.Generators {
                 }
 
                 if (Buffer.TryFindMin(out var minNode)) {
-                    if (Buffer.Remove(minNode!.Data)) {
-                        return minNode.Data;
+                    var searchData = minNode.Data;
+                    if (Buffer.Remove(searchData)) {
+                        return searchData;
                     }
                     throw new Exception($"Can't remove value '{minNode.Data}' but it was defined as minValue!");
                 }   

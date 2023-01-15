@@ -271,6 +271,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
             }
 
             void ReleaseNode(Node<int> node) {
+                node.Data = default;
                 useNodesCounter--;
             }
 
@@ -285,7 +286,8 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
 
             tree.Remove(4);
             tree.Remove(2);
-            tree.TryDequeue(out _);
+            Assert.AreEqual(true, tree.TryDequeue(out var dequeueValue));
+            Assert.AreEqual(1, dequeueValue);
             Assert.AreEqual(2, useNodesCounter);
             tree.Remove(3);
             tree.Remove(5);
@@ -312,8 +314,8 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
 
             foreach (int expected in dequeueOrder) {
                 Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
-                Assert.That(_tree.TryDequeue(out var node), Is.True);
-                Assert.That(node!.Data, Is.EqualTo(expected));
+                Assert.That(_tree.TryDequeue(out var value), Is.True);
+                Assert.That(value!, Is.EqualTo(expected));
             }
             Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
             Assert.That(_tree.TryDequeue(out _), Is.False);

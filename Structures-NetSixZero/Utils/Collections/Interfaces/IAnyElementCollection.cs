@@ -18,5 +18,10 @@ namespace Structures.NetSixZero.Utils.Collections.Interfaces {
         /// </summary>
         /// <param name="value">Любой элемент, если он существует в коллекции</param>
         bool TryGetAny(out T? value);
+
+        /// <summary>
+        /// Копирует данные из одной коллекции в другую
+        /// </summary>
+        void CopyTo(IAnyElementCollection<T> destinationCollection);
     }
 }

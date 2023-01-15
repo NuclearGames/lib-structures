@@ -56,6 +56,12 @@ namespace Structures.NetSixZero.Structures.BCST {
         public bool TryGetAny(out TData? value) {
             return _dataCollection.TryGetAny(out value);
         }
+        
+        public void CopyTo(IAnyElementCollection<TData> destinationCollection) {
+            foreach (var data in _dataCollection) {
+                destinationCollection.Add(data);
+            }
+        }
 
 #endregion
 
@@ -63,11 +69,6 @@ namespace Structures.NetSixZero.Structures.BCST {
 
         public int Count => _dataCollection.Count;
         public bool IsReadOnly => false;
-
-        // public TData this[int index] {
-        //     get => _dataCollection[index];
-        //     set => _dataCollection[index] = value;
-        // }
 
         public void Add(TData item) => _dataCollection.Add(item);
 
@@ -81,15 +82,9 @@ namespace Structures.NetSixZero.Structures.BCST {
 
         public bool Contains(TData item) => _dataCollection.Contains(item);
 
-        // public int IndexOf(TData item) => _dataCollection.IndexOf(item);
-
         public bool Remove(TData item) => _dataCollection.Remove(item);
         
-        // public void RemoveAt(int index) => _dataCollection.RemoveAt(index);
-        
         void ICollection<TData>.CopyTo(TData[] array, int arrayIndex) => _dataCollection.CopyTo(array, arrayIndex);
-
-        // void IList<TData>.Insert(int index, TData item) => _dataCollection.Insert(index, item);
 
 #region Enumerable
 

@@ -42,7 +42,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <param name="data">Данные</param>
         /// <param name="resultNode">Узел, добавленный в случае успеха, или существующий, в случае провала</param>
         /// <returns>Удалось создать новый узел (True) или узел уже  существовал (False)</returns>
-        public virtual bool TryAdd(TData data, out Node<TData> resultNode) {
+        public virtual bool TryAdd(TData data, out Node<TData>? resultNode) {
             if (IsEmpty) {
                 Root = GetNode(data);
                 resultNode = Root;
@@ -55,7 +55,7 @@ namespace Structures.NetSixZero.Structures.BST {
             TComparable dataValue = CompareFieldSelector(data);
 
             bool? result = null;
-            resultNode = default!;
+            resultNode = null;
 
             while (!result.HasValue) {
                 var compareResult = Compare(dataValue, node.Data);
@@ -169,7 +169,7 @@ namespace Structures.NetSixZero.Structures.BST {
         /// </summary>
         /// <param name="resultNode">Узел дерева с минимальными данными</param>
         /// <returns>Найден такой узел (true) или нет (fasle)</returns>
-        public virtual bool TryFindMin(out Node<TData>? resultNode) {
+        public virtual bool TryFindMin([MaybeNullWhen(false)] out Node<TData> resultNode) {
             if (IsEmpty) {
                 resultNode = null;
 
@@ -268,10 +268,12 @@ namespace Structures.NetSixZero.Structures.BST {
                 return false;
             }
 
+            int? prevCompareResult, compareResult = null; 
             var compareValue = CompareFieldSelector(data);
 
             while (temp != null) {
-                int compareResult = Compare(compareValue, temp.Data);
+                prevCompareResult = compareResult;
+                compareResult = Compare(compareValue, temp.Data);
                 if (compareResult > 0) {
                     parent = temp;
                     temp = temp.Right;
@@ -279,31 +281,31 @@ namespace Structures.NetSixZero.Structures.BST {
                     parent = temp;
                     temp = temp.Left;
                 } else {
-                    if (temp.Left == null && temp.Right == null) {
-                        if (parent != null) {
-                            if (parent.Left == temp) {
-                                parent.Left = null;
-                            } else {
-                                parent.Right = null;
-                            }
-                        }
+                    Node<TData>? SwitchNull() => null;
 
-                        removeNode = temp;
-                    } else if (temp.Left == null || temp.Right == null) {
-                        if (temp.Left != null) {
-                            if (parent == null) {
-                                Root = temp.Left;
+                    Node<TData>? SwitchLeaf() {
+                        return temp.Left ?? temp.Right;
+                    }
+
+                    void ReplaceLeaf(bool withNull) {
+                        var newLeaf = withNull ? SwitchNull() : SwitchLeaf();
+                        
+                        if (prevCompareResult.HasValue) {
+                            if (prevCompareResult < 0) {
+                                parent!.Left = newLeaf;
                             } else {
-                                parent.Left = temp.Left;
+                                parent!.Right = newLeaf;
                             }
                         } else {
-                            if (parent == null) {
-                                Root = temp.Right;
-                            } else {
-                                parent.Right = temp.Right;
-                            }
+                            Root = newLeaf;
                         }
-
+                    }
+                    
+                    if (temp.Left == null && temp.Right == null) {
+                        ReplaceLeaf(true);
+                        removeNode = temp;
+                    } else if (temp.Left == null || temp.Right == null) {
+                        ReplaceLeaf(false);
                         removeNode = temp;
                     } else {
                         var parent2 = temp;
@@ -344,17 +346,12 @@ namespace Structures.NetSixZero.Structures.BST {
         /// <summary>
         /// Пытается извлечь нод с минимальным значением.
         /// </summary>
-        /// <param name="resultNode">Извлеченный нод или NULL.</param>
+        /// <param name="value">Извлеченный нод или NULL.</param>
         /// <returns>True - нод был извлечен; False - нет нод.</returns>
-        public virtual bool TryDequeue(out Node<TData>? resultNode) {
+        public virtual bool TryDequeue([MaybeNullWhen(false)] out TData value) {
             if (IsEmpty) {
-                resultNode = null;
-
+                value = default;
                 return false;
-            }
-
-            if (Root == null) {
-                Console.WriteLine($"null: {IsEmpty}, {NodesCount}");
             }
 
             // Добегаем до последнего левого нода (минимальное значение).
@@ -377,17 +374,18 @@ namespace Structures.NetSixZero.Structures.BST {
 
             NodesCount--;
 
+            value = current.Data;
             ReleaseNode(current);
-
-            resultNode = current;
 
             return true;
         }
 
         /// <summary>
-        /// Очишает все дерево
+        /// Очищает все дерево
         /// </summary>
         public virtual void Clear() {
+            while (TryDequeue(out _)) { }
+            
             Root = null;
             NodesCount = 0;
         }
@@ -486,6 +484,15 @@ namespace Structures.NetSixZero.Structures.BST {
             value = Root!.Data;
 
             return true;
+        }
+
+        /// <summary>
+        /// Копирует данные в другую коллекцию типа 
+        /// </summary>
+        public void CopyTo(IAnyElementCollection<TData> destinationCollection) {
+            foreach (var data in this) {
+                destinationCollection.Add(data);
+            }
         }
 
         /// <summary>

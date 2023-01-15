@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Structures.NetSixZero.Structures.BCST;
 using Structures.NetSixZero.Utils.Collections;
@@ -254,6 +255,49 @@ namespace Structures_UnitTests_NetSixZero.Structures.BCST {
             Assert.AreEqual(false, root!.IsEmpty);
             Assert.AreEqual(false, root.IsReadOnly);
             
+        }
+
+        [TestCase(new int[]{ 9, 4, 17, 3, 6, 22, 5 ,7, 20, 7, 17, 3, 22, 5})]
+        public void IterationTest(int[] values) {
+            _tree.AddRange(values);
+            
+            var list = new List<int>(values);
+            list.Sort();
+
+            var index = 0;
+            foreach (var treeValue in _tree) {
+                Assert.AreEqual(list[index], treeValue);
+                index++;
+            }
+        }
+        
+        /// <summary>
+        /// Проверяет:
+        /// - ноды извлекаются в правильном порядке.
+        /// </summary>
+        [Test]
+        public void TryDequeueTest() {
+            _tree.Add(6, out _);
+            _tree.Add(10, out _);
+            _tree.Add(9, out _);
+            _tree.Add(4, out _);
+            _tree.Add(6, out _);
+            _tree.Add(5, out _);
+            _tree.Add(7, out _);
+            _tree.Add(4, out _);
+            _tree.Add(12, out _);
+            _tree.Add(11, out _);
+
+            int[] dequeueOrder = new int[] { 4, 5, 6, 7, 9, 10, 11, 12 };
+            int nodesCount = dequeueOrder.Length;
+
+            foreach (int expected in dequeueOrder) {
+                Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+                Assert.That(_tree.TryDequeue(out var collection), Is.True);
+                collection!.ForEach(v => Assert.That(v, Is.EqualTo(expected)));
+            }
+            Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
+            Assert.That(_tree.TryDequeue(out _), Is.False);
         }
 
 #region Utils

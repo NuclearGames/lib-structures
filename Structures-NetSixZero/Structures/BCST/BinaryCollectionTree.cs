@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using Structures.NetSixZero.Structures.Collections.NonAllocated;
 using Structures.NetSixZero.Utils.Collections.Interfaces;
 
 
@@ -40,55 +42,62 @@ namespace Structures.NetSixZero.Structures.BCST {
 
             AddRange(sourceBuffer);
         }
-
+        
         /// <summary>
         /// Добавляет данные в дерево
         /// <para>Если подходящий узел с данными уже существует, то данные добавляются в коллекцию этого узла</para>
         /// </summary>
-        public void Add(TData data, out CollectionNode<TData, TCollection> resultNode) {
+        public void Add(TData data, out CollectionNode<TData, TCollection>? resultNode) {
             if (IsEmpty()) {
-                Root = new CollectionNode<TData, TCollection>(data);
+                Root = GetNode(data);
                 resultNode = Root;
                 NodesCount++;
                 DataCount++;
-                
+
                 return;
             }
 
             var node = Root!;
+            resultNode = null;
+            var dataValue = _compareFieldSelector(data);
 
-            void SearchTree(CollectionNode<TData, TCollection> currentNode, out CollectionNode<TData, TCollection> resultNodeInternal) {
-                var compareResult = Compare(data, currentNode);
+            bool found = false;
+            while (!found) {
+                var compareResult = Compare(dataValue, node);
                 switch (compareResult) {
                     case < 0:
-                        if (currentNode.Left == null) {
-                            currentNode.Left = new CollectionNode<TData, TCollection>(data);
-                            resultNodeInternal = currentNode.Left;
+                        if (node.Left == null) {
+                            node.Left = GetNode(data);
+                            resultNode = node.Left!;
                             NodesCount++;
+                            found = true;
                         } else {
-                            SearchTree(currentNode.Left, out resultNodeInternal);
+                            node = node.Left;
                         }
 
                         break;
+
                     case > 0:
-                        if (currentNode.Right == null) {
-                            currentNode.Right = new CollectionNode<TData, TCollection>(data);
-                            resultNodeInternal = currentNode.Right;
+                        if (node.Right == null) {
+                            node.Right = GetNode(data);
+                            resultNode = node.Right!;
                             NodesCount++;
+                            found = true;
                         } else {
-                            SearchTree(currentNode.Right, out resultNodeInternal);
+                            node = node.Right;
                         }
 
                         break;
-                    default:
-                        currentNode.Add(data);
-                        resultNodeInternal = currentNode;
 
-                        return;
+                    default:
+                        node.Add(data);
+                        resultNode = node;
+                        found = true;
+
+                        break;
                 }
             }
-
-            SearchTree(node, out resultNode);
+            
             DataCount++;
         }
 
@@ -97,34 +106,53 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// </summary>
         /// <returns>Был ли добавлен хотя бы один элемент</returns>
         public void AddRange(TData[] sourceBuffer) {
-            void AddElement(int pointIndex, int window) {
-                if (pointIndex < 0 || pointIndex >= sourceBuffer.Length) {
+            
+            switch (sourceBuffer.Length) {
+                case 0:
                     return;
-                }
+                case 1:
+                    Add(sourceBuffer[0], out _);
+                    break;
+                default:
+                    Span<AddRangeItem> numbers = stackalloc AddRangeItem[(int)Math.Log2(sourceBuffer.Length)];
+                    var stackBuffer = new NonAllocatedStack<AddRangeItem>(ref numbers);
 
-                Add(sourceBuffer[pointIndex], out _);
-                if (window == 1) {
-                    return;
-                }
+                    stackBuffer.Push(new AddRangeItem(sourceBuffer.Length / 2, sourceBuffer.Length / 2));
 
-                var newWindow = window / 2;
+                    int maxStackSize = 1;
 
-                if (window % 2 == 0) {
-                    AddElement(pointIndex + newWindow, newWindow);
-                    AddElement(pointIndex - newWindow, newWindow);
-                } else {
-                    Add(sourceBuffer[pointIndex + newWindow * 2], out _);
-                    Add(sourceBuffer[pointIndex - 1], out _);
+                    while (stackBuffer.TryPop(out var addRangeItem)) {
+                        if (addRangeItem.Index < 0 || addRangeItem.Index >= sourceBuffer.Length) {
+                            continue;
+                        }
 
-                    AddElement(pointIndex + newWindow, newWindow);
-                    AddElement(pointIndex - newWindow - 1, newWindow);
-                }
-            }
+                        Add(sourceBuffer[addRangeItem.Index], out _);
 
-            AddElement(sourceBuffer.Length / 2, sourceBuffer.Length / 2);
-            Add(sourceBuffer[0], out _);
-            if (sourceBuffer.Length % 2 == 1) {
-                Add(sourceBuffer[^1], out _);
+                        if (addRangeItem.Window == 1) {
+                            continue;
+                        }
+
+                        var newWindow = addRangeItem.Window / 2;
+                        if (addRangeItem.Window % 2 == 0) {
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index + newWindow, newWindow));
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index - newWindow, newWindow));
+                        } else {
+                            Add(sourceBuffer[addRangeItem.Index + newWindow * 2], out _);
+                            Add(sourceBuffer[addRangeItem.Index - 1], out _);
+
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index + newWindow, newWindow));
+                            stackBuffer.Push(new AddRangeItem(addRangeItem.Index - newWindow - 1, newWindow));
+                        }
+
+                        maxStackSize = Math.Max(maxStackSize, stackBuffer.Count);
+                    }
+
+                    Add(sourceBuffer[0], out _);
+                    if (sourceBuffer.Length % 2 == 1) {
+                        Add(sourceBuffer[^1], out _);
+                    }
+
+                    break;
             }
         }
 
@@ -176,34 +204,8 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// <returns>True, если узел найден; False - если узел не найден</returns>
         /// <exception cref="ArgumentNullException">Недопустимая ошибка сравнения при обходе дерева</exception>
         public bool TryFind(TData data, out CollectionNode<TData, TCollection>? resultNode) {
-            if (IsEmpty()) {
-                resultNode = null;
-
-                return false;
-            }
-
-            resultNode = Root!;
-            int compareResult;
-            while ((compareResult = Compare(data, resultNode)) != 0) {
-                switch (compareResult) {
-                    case < 0:
-                        resultNode = resultNode.Left;
-
-                        break;
-                    case > 0:
-                        resultNode = resultNode.Right;
-
-                        break;
-                    default:
-                        throw new ArgumentNullException(nameof(resultNode));
-                }
-
-                if (resultNode == null) {
-                    return false;
-                }
-            }
-
-            return true;
+            var dataValue = _compareFieldSelector(data);
+            return TryFindByKey(dataValue, out resultNode);
         }
         
         /// <summary>
@@ -252,17 +254,14 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// </summary>
         public bool TryRemove(TData data) {
             // Удаляет данные из узла и блокирует удаление узла, если в узле остались другие данные
-            bool InterruptRemoveCondition(CollectionNode<TData, TCollection> node) {
+            bool OnElementFound(CollectionNode<TData, TCollection> node) {
                 if (node.Remove(data)) {
                     DataCount--;
                 }
-                return node.Count != 0;
+                return node.Count == 0;
             }
 
-            var result = TryRemoveInternal(Root, _compareFieldSelector(data), InterruptRemoveCondition, out var resultNode);
-            Root = resultNode;
-
-            return result;
+            return RemoveInternal(_compareFieldSelector(data), OnElementFound, out _);
         }
 
         /// <summary>
@@ -270,92 +269,153 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// <param name="comparableKey">Ключ поиска по дереву</param>
         /// </summary>
         public bool TryRemoveNode(TComparable comparableKey) {
-            var result = TryRemoveInternal(Root, comparableKey, null, out var resultNode);
-            Root = resultNode;
+            bool OnElementFound(CollectionNode<TData, TCollection> node) {
+                DataCount -= node.Count;
+                node.Clear();
 
+                return true;
+            }
+
+            return RemoveInternal(comparableKey, OnElementFound, out _);
+        }
+
+        /// <summary>
+        /// Пытается удалить узел дерева по данным
+        /// </summary>
+        /// <param name="actionOnRemove"></param>
+        /// <param name="removeNode"></param>
+        /// <param name="compareValue"></param>
+        /// <returns>True - данные найдены и удалить получилось. False - данные найдены не были </returns>
+        private protected virtual bool RemoveInternal(TComparable compareValue, Func<CollectionNode<TData, TCollection>, bool> actionOnRemove, [MaybeNullWhen(false)] out CollectionNode<TData, TCollection> removeNode) {
+            bool result = false;
+            CollectionNode<TData, TCollection>? temp = Root, parent = null;
+            
+            // Проверяем, пустое ли дерево
+            if (temp == null) {
+                removeNode = null;
+                return false;
+            }
+
+            
+            int? prevCompareResult, compareResult = null;
+            
+            while (temp != null) {
+                prevCompareResult = compareResult;
+                compareResult = Compare(compareValue, temp);
+                if (compareResult > 0) {
+                    parent = temp;
+                    temp = temp.Right;
+                } else if (compareResult < 0) {
+                    parent = temp;
+                    temp = temp.Left;
+                } else {
+                    // Выполняем действие при нахождении элемента под удаление
+                    bool needRemove = actionOnRemove(temp);
+                    if (!needRemove) {
+                        removeNode = temp;
+                        return true;
+                    }
+                    
+                    CollectionNode<TData, TCollection>? SwitchNull() => null;
+
+                    CollectionNode<TData, TCollection>? SwitchLeaf() {
+                        return temp.Left ?? temp.Right;
+                    }
+                    
+                    void ReplaceLeaf(bool withNull) {
+                        var newLeaf = withNull ? SwitchNull() : SwitchLeaf();
+                        
+                        if (prevCompareResult.HasValue) {
+                            if (prevCompareResult < 0) {
+                                parent!.Left = newLeaf;
+                            } else {
+                                parent!.Right = newLeaf;
+                            }
+                        } else {
+                            Root = newLeaf;
+                        }
+                    }
+                    
+                    if (temp.Left == null && temp.Right == null) {
+                        ReplaceLeaf(true);
+                        removeNode = temp;
+                    } else if (temp.Left == null || temp.Right == null) {
+                        ReplaceLeaf(false);
+                        removeNode = temp;
+                    } else {
+                        var parent2 = temp;
+                        var temp2 = temp.Right;
+                        while (temp2.Left != null) {
+                            parent2 = temp2;
+                            temp2 = temp2.Left;
+                        }
+
+                        // меняем данные в нодах
+                        temp.Clear();
+                        temp.AddRange(temp2);
+                        
+                        // удаляем нод
+                        if (parent2 == temp) {
+                            parent2.Right = null;
+                        } else {
+                            parent2.Left = null;
+                        }
+
+                        removeNode = temp2;
+                    }
+
+                    ReleaseNode(removeNode);
+                    result = true;
+
+                    break;
+                }
+            }
+
+            if (result) {
+                NodesCount--;
+            }
+
+            removeNode = null;
             return result;
         }
         
         /// <summary>
-        /// Удаляет узел <paramref name="node"/> по ключу <paramref name="comparableKey"/>, если условие <paramref name="interruptRemoveCondition"/> не выполняется
+        /// Пытается извлечь нод с минимальным значением.
         /// </summary>
-        bool TryRemoveInternal(CollectionNode<TData, TCollection>? node, TComparable comparableKey, Func<CollectionNode<TData, TCollection>, bool>? interruptRemoveCondition, out CollectionNode<TData, TCollection>? resultNode, bool isRecursiveRemove = false) {
-            if (node == null) {
-                resultNode = null;
-
+        /// <param name="resultCollection">Извлеченный нод или NULL.</param>
+        /// <returns>True - нод был извлечен; False - нет нод.</returns>
+        public virtual bool TryDequeue([MaybeNullWhen(false)] out TCollection resultCollection) {
+            if (IsEmpty()) {
+                resultCollection = default;
                 return false;
             }
 
-            var compareResult = comparableKey.CompareTo(_compareFieldSelector(node.Any));
-            bool internalResult;
-            CollectionNode<TData, TCollection>? replaceNode;
-
-            switch (compareResult) {
-                case < 0: {
-                    internalResult = TryRemoveInternal(node.Left, comparableKey, interruptRemoveCondition, out replaceNode, isRecursiveRemove);
-                    node.Left = replaceNode;
-                    resultNode = node;
-
-                    return internalResult;
-                }
-                case > 0: {
-                    internalResult = TryRemoveInternal(node.Right, comparableKey, interruptRemoveCondition, out replaceNode, isRecursiveRemove);
-                    node.Right = replaceNode;
-                    resultNode = node;
-
-                    return internalResult;
-                }
-                default: {
-                    if (interruptRemoveCondition == null) {
-                        if(!isRecursiveRemove) {
-                            DataCount -= node.Count;
-                        }
-                    } else if (interruptRemoveCondition.Invoke(node)) {
-                        resultNode = node;
-                        return true;
-                    }
-                    
-                    // node has no children
-                    if (node.Left == null && node.Right == null) {
-                        resultNode = null;
-                        NodesCount--;
-                        return true;
-                    }
-
-                    // node has no left child
-                    if (node.Left == null) {
-                        resultNode = node.Right;
-                        NodesCount--;
-                        return true;
-                    }
-
-                    // node has no right child
-                    if (node.Right == null) {
-                        resultNode = node.Left;
-                        NodesCount--;
-                        return true;
-                    }
-
-                    // node has two children
-                    var tempNode = node.Right;
-                    while (tempNode.Left != null) {
-                        tempNode = tempNode.Left;
-                    }
-
-                    node.Clear();
-                    node.AddRange(tempNode);
-                    resultNode = node;
-
-                    internalResult = TryRemoveInternal(
-                        node.Right, 
-                        _compareFieldSelector(tempNode.Any), 
-                        null, 
-                        out replaceNode, true);
-                    node.Right = replaceNode;
-
-                    return internalResult;
-                }
+            // Добегаем до последнего левого нода (минимальное значение).
+            CollectionNode<TData, TCollection>? prev = null;
+            CollectionNode<TData, TCollection> current = Root!;
+            while (current.Left != null) {
+                prev = current;
+                current = current.Left;
             }
+
+            if (prev == null) {
+                // Делаем правый нод корня новым корневым.
+                // Если правого нода не было - прекинется NULL.
+                Root = current.Right;
+            } else {
+                // Перекидываем правый нод наименьшего на его родителя.
+                // Если правого нода не было - прекинется NULL.
+                prev.Left = current.Right;
+            }
+
+            NodesCount--;
+
+            resultCollection = new TCollection();
+            current.CopyTo(resultCollection);
+            
+            ReleaseNode(current);
+
+            return true;
         }
 
         /// <summary>
@@ -415,13 +475,46 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// сбалансировано ли дерево?
         /// </summary>
         public bool IsBalanced() => FindMinHeight() >= FindMaxHeight() - 1;
-
-#region Utils
-
-        // private int Compare(TData source, TData to) {
-        //     return _compareFieldSelector(source).CompareTo(_compareFieldSelector(to));
-        // }
         
+        /// <summary>
+        /// Возвращает перечисление элементов 
+        /// </summary>
+        IEnumerator<TData> TraverseTreeInternal() {
+            if (Root == null) {
+                yield break;
+            }
+
+            Stack<CollectionNode<TData, TCollection>> stackBuffer = new Stack<CollectionNode<TData, TCollection>>((int)Math.Log2(NodesCount));
+            CollectionNode<TData, TCollection>? curr = Root;
+            while (curr != null || stackBuffer.Count > 0) {
+                while (curr != null) {
+                    stackBuffer.Push(curr);
+                    curr = curr.Left;
+                }
+
+                curr = stackBuffer.Pop();
+
+                foreach (var data in curr) {
+                    yield return data;
+                }
+                curr = curr.Right;
+            }
+        }
+        
+#region Overrides
+
+        protected virtual CollectionNode<TData, TCollection> GetNode(TData data) {
+            return new CollectionNode<TData, TCollection>(data);
+        }
+
+        protected virtual void ReleaseNode(CollectionNode<TData, TCollection> node) {
+            node.Clear();
+        }
+
+#endregion
+        
+#region Utils
+       
         private int Compare(TData source, IAnyElementCollection<TData> to) {
             if (to.TryGetAny(out var toData)) {
                 return _compareFieldSelector(source).CompareTo(_compareFieldSelector(toData!));
@@ -473,40 +566,18 @@ namespace Structures.NetSixZero.Structures.BCST {
         }
 
         public IEnumerator<TData> GetEnumerator() {
-            if (IsEmpty()) {
-                yield break;
-            }
-
-            IEnumerator<TData> EnumerateTreeInternal(CollectionNode<TData, TCollection> currentNode) {
-                if (currentNode == null) throw new ArgumentNullException(nameof(currentNode));
-                if (currentNode.Left != null) {
-                    var internalEnumerator = EnumerateTreeInternal(currentNode.Left);
-                    while (internalEnumerator.MoveNext()) {
-                        yield return internalEnumerator.Current;
-                    }
-                }
-
-                foreach (var data in currentNode) {
-                    yield return data;
-                }
-
-                if (currentNode.Right != null) {
-                    var internalEnumerator = EnumerateTreeInternal(currentNode.Right);
-                    while (internalEnumerator.MoveNext()) {
-                        yield return internalEnumerator.Current;
-                    }
-                }
-            }
-
-            var enumerator = EnumerateTreeInternal(Root!);
-            while (enumerator.MoveNext()) {
-                yield return enumerator.Current;
-            }
+            return TraverseTreeInternal();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
         }
+
+#endregion
+        
+#region Utils
+
+        private readonly record struct AddRangeItem(int Index, int Window);
 
 #endregion
     }
