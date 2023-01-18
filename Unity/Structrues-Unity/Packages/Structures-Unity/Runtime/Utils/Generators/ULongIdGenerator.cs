@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using NuclearGames.StructuresUnity.Extension;
+using NuclearGames.StructuresUnity.Extensions;
 
 namespace NuclearGames.StructuresUnity.Utils.Generators {
     public class ULongIdGenerator : BaseIdGenerator<ulong> {
