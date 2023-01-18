@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
+using NuclearGames.StructuresUnity.Extensions;
 using NuclearGames.StructuresUnity.Structures.BST;
 using NuclearGames.StructuresUnity.Structures.BST.Utils;
 using NUnit.Framework;
 
-namespace Tests.Editor.Structures.BST {
+namespace NuclearGames.StructuresUnity.Tests.Editor.Structures.BST {
     public class BinaryTreeUnitTests {
         private readonly int[] _dataCollection = new int[] {
             9, 4, 17, 3, 6, 22, 5 ,7, 20
@@ -41,7 +42,7 @@ namespace Tests.Editor.Structures.BST {
         }
         
         [Test]
-        public void SuccessfulAddRange([Values(10, 11, 1000, 1001)]int count) {
+        public void SuccessfulAddRange([Values(10, 11, 1000, 1001, 100000)]int count) {
             var sourceBuffer = Enumerable.Range(0, count).ToArray();
             var newTree = new BinaryTree<int>(sourceBuffer);
             Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
@@ -52,6 +53,15 @@ namespace Tests.Editor.Structures.BST {
             Assert.AreEqual(true, addResult);
             Assert.AreEqual(count + count, newTree.NodesCount);
             Assert.AreEqual(count + count, newTree.ToArray().Length);
+        }
+        
+        [Test]
+        public void AddRangeShuffled([Values(10, 11, 1000, 1001, 100000, 10000000)]int count) {
+            var sourceBuffer = Enumerable.Range(0, count).ToArray();
+            sourceBuffer.Shuffle();
+            var newTree = new BinaryTree<int>(sourceBuffer);
+            Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
+            Assert.AreEqual(sourceBuffer.Length, newTree.ToArray().Length);
         }
         
         [TestCase(20)]
@@ -70,7 +80,7 @@ namespace Tests.Editor.Structures.BST {
             Assert.AreEqual(true, _tree.TryFind(4, out _));
             Assert.AreEqual(false, _tree.TryFind(19, out _));
             
-            void AssertResults(bool result, Node<int>? node, int? value) {
+            void AssertResults(bool result, Node<int> node, int? value) {
                 Assert.AreEqual(value.HasValue, result);
                 if (value.HasValue) {
                     Assert.IsNotNull(node);
@@ -226,7 +236,7 @@ namespace Tests.Editor.Structures.BST {
                 index++;
             }
             
-            Array.Clear(destArray, 0, destArray.Length - 1);
+            Array.Clear(destArray, 0, destArray.Length);
             Assert.Catch(() => _tree.CopyTo(destArray, 1));
         }
         
@@ -258,6 +268,7 @@ namespace Tests.Editor.Structures.BST {
             }
 
             void ReleaseNode(Node<int> node) {
+                node.Data = default;
                 useNodesCounter--;
             }
 
@@ -272,10 +283,11 @@ namespace Tests.Editor.Structures.BST {
 
             tree.Remove(4);
             tree.Remove(2);
-            tree.Remove(5);
+            Assert.AreEqual(true, tree.TryDequeue(out var dequeueValue));
+            Assert.AreEqual(1, dequeueValue);
             Assert.AreEqual(2, useNodesCounter);
             tree.Remove(3);
-            tree.Remove(1);
+            tree.Remove(5);
             Assert.AreEqual(0, useNodesCounter);
         }
 
@@ -299,8 +311,8 @@ namespace Tests.Editor.Structures.BST {
 
             foreach (int expected in dequeueOrder) {
                 Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
-                Assert.That(_tree.TryDequeue(out var node), Is.True);
-                Assert.That(node!.Data, Is.EqualTo(expected));
+                Assert.That(_tree.TryDequeue(out var value), Is.True);
+                Assert.That(value!, Is.EqualTo(expected));
             }
             Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
             Assert.That(_tree.TryDequeue(out _), Is.False);

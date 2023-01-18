@@ -40,5 +40,9 @@ namespace Structures.NetSixZero.Utils.Collections {
             value = this[0];
             return true;
         }
+
+        public void CopyTo(IAnyElementCollection<T> destinationCollection) {
+            ForEach(destinationCollection.Add);
+        }
     }
 }

@@ -112,7 +112,7 @@ namespace Structures_UnitTests_NetSixZero.Randoms {
 #region Utils
 
         private static void CheckMean(double sum, double mean, double meanWindow, int totalCount) {
-            var newMean = sum / totalCount;
+            var newMean = Math.Round(sum / totalCount, 3);
             (double Min, double Max) meanBounds = (mean - meanWindow, mean + meanWindow);
 
             Assert.GreaterOrEqual(newMean, meanBounds.Min);

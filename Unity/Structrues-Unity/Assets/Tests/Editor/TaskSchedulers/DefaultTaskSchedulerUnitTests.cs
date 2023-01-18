@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests.Editor.TaskSchedulers {
+namespace NuclearGames.StructuresUnity.Tests.Editor.TaskSchedulers {
     internal sealed class DefaultTaskSchedulerUnitTests {
 
         private DefaultTaskScheduler _taskScheduler;

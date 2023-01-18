@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using NuclearGames.StructuresUnity.Utils.Collections.Interfaces;
 
 namespace NuclearGames.StructuresUnity.Structures.BCST {
@@ -52,8 +53,14 @@ namespace NuclearGames.StructuresUnity.Structures.BCST {
         /// Есть ли в коллекции хотя бы один элемент
         /// </summary>
         /// <param name="value">Любой элемент, если он существует в коллекции</param>
-        public bool TryGetAny(out TData value) {
+        public bool TryGetAny([CanBeNull] out TData value) {
             return _dataCollection.TryGetAny(out value);
+        }
+        
+        public void CopyTo(IAnyElementCollection<TData> destinationCollection) {
+            foreach (var data in _dataCollection) {
+                destinationCollection.Add(data);
+            }
         }
 
 #endregion
@@ -62,11 +69,6 @@ namespace NuclearGames.StructuresUnity.Structures.BCST {
 
         public int Count => _dataCollection.Count;
         public bool IsReadOnly => false;
-
-        // public TData this[int index] {
-        //     get => _dataCollection[index];
-        //     set => _dataCollection[index] = value;
-        // }
 
         public void Add(TData item) => _dataCollection.Add(item);
 
@@ -80,15 +82,9 @@ namespace NuclearGames.StructuresUnity.Structures.BCST {
 
         public bool Contains(TData item) => _dataCollection.Contains(item);
 
-        // public int IndexOf(TData item) => _dataCollection.IndexOf(item);
-
         public bool Remove(TData item) => _dataCollection.Remove(item);
         
-        // public void RemoveAt(int index) => _dataCollection.RemoveAt(index);
-        
         void ICollection<TData>.CopyTo(TData[] array, int arrayIndex) => _dataCollection.CopyTo(array, arrayIndex);
-
-        // void IList<TData>.Insert(int index, TData item) => _dataCollection.Insert(index, item);
 
 #region Enumerable
 

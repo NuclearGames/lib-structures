@@ -2,11 +2,12 @@
     "name": "Structures-Unity",
     "rootNamespace": "NuclearGames.StructuresUnity",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:964d3397092cee24c8a8c2c87eba77ee"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

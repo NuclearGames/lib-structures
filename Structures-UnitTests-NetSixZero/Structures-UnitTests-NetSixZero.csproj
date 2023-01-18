@@ -8,9 +8,13 @@
         <IsPackable>false</IsPackable>
 
         <AssemblyName>Structures-UnitTests-NetSixZero</AssemblyName>
+
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.3" />
+        <PackageReference Include="JetBrains.dotMemoryUnit" Version="3.2.20220510" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
         <PackageReference Include="NUnit" Version="3.13.2" />
         <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />

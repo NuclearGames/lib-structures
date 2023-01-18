@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using Structures.NetSixZero.Extensions;
 using Structures.NetSixZero.Structures.BST;
 using Structures.NetSixZero.Structures.BST.Utils;
 
@@ -44,7 +45,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
         }
         
         [Test]
-        public void SuccessfulAddRange([Values(10, 11, 1000, 1001)]int count) {
+        public void SuccessfulAddRange([Values(10, 11, 1000, 1001, 100000)]int count) {
             var sourceBuffer = Enumerable.Range(0, count).ToArray();
             var newTree = new BinaryTree<int>(sourceBuffer);
             Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
@@ -55,6 +56,15 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
             Assert.AreEqual(true, addResult);
             Assert.AreEqual(count + count, newTree.NodesCount);
             Assert.AreEqual(count + count, newTree.ToArray().Length);
+        }
+        
+        [Test]
+        public void AddRangeShuffled([Values(10, 11, 1000, 1001, 100000, 10000000)]int count) {
+            var sourceBuffer = Enumerable.Range(0, count).ToArray();
+            sourceBuffer.Shuffle();
+            var newTree = new BinaryTree<int>(sourceBuffer);
+            Assert.AreEqual(sourceBuffer.Length, newTree.NodesCount);
+            Assert.AreEqual(sourceBuffer.Length, newTree.ToArray().Length);
         }
         
         [TestCase(20)]
@@ -261,6 +271,7 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
             }
 
             void ReleaseNode(Node<int> node) {
+                node.Data = default;
                 useNodesCounter--;
             }
 
@@ -275,7 +286,8 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
 
             tree.Remove(4);
             tree.Remove(2);
-            tree.TryDequeue(out _);
+            Assert.AreEqual(true, tree.TryDequeue(out var dequeueValue));
+            Assert.AreEqual(1, dequeueValue);
             Assert.AreEqual(2, useNodesCounter);
             tree.Remove(3);
             tree.Remove(5);
@@ -302,8 +314,8 @@ namespace Structures_UnitTests_NetSixZero.Structures.BST {
 
             foreach (int expected in dequeueOrder) {
                 Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
-                Assert.That(_tree.TryDequeue(out var node), Is.True);
-                Assert.That(node!.Data, Is.EqualTo(expected));
+                Assert.That(_tree.TryDequeue(out var value), Is.True);
+                Assert.That(value!, Is.EqualTo(expected));
             }
             Assert.That(_tree.NodesCount, Is.EqualTo(nodesCount--));
             Assert.That(_tree.TryDequeue(out _), Is.False);
