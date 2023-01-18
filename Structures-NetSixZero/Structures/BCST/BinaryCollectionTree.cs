@@ -479,7 +479,7 @@ namespace Structures.NetSixZero.Structures.BCST {
         /// <summary>
         /// Возвращает перечисление элементов 
         /// </summary>
-        IEnumerator<TData> TraverseTreeInternal() {
+        private IEnumerator<TData> TraverseTreeDataInternal() {
             if (Root == null) {
                 yield break;
             }
@@ -497,6 +497,29 @@ namespace Structures.NetSixZero.Structures.BCST {
                 foreach (var data in curr) {
                     yield return data;
                 }
+                curr = curr.Right;
+            }
+        }
+        
+        /// <summary>
+        /// Возвращает перечисление нод элементов 
+        /// </summary>
+        private IEnumerator<CollectionNode<TData, TCollection>> TraverseTreeInternal() {
+            if (Root == null) {
+                yield break;
+            }
+
+            Stack<CollectionNode<TData, TCollection>> stackBuffer = new Stack<CollectionNode<TData, TCollection>>((int)Math.Log2(NodesCount));
+            CollectionNode<TData, TCollection>? curr = Root;
+            while (curr != null || stackBuffer.Count > 0) {
+                while (curr != null) {
+                    stackBuffer.Push(curr);
+                    curr = curr.Left;
+                }
+
+                curr = stackBuffer.Pop();
+                yield return curr;
+                
                 curr = curr.Right;
             }
         }
@@ -536,37 +559,14 @@ namespace Structures.NetSixZero.Structures.BCST {
 #region Enumerable
 
         public IEnumerable<CollectionNode<TData, TCollection>> Iterate() {
-            if (IsEmpty()) {
-                yield break;
-            }
-            
-            IEnumerator<CollectionNode<TData, TCollection>> EnumerateTreeInternal(CollectionNode<TData, TCollection> currentNode) {
-                if (currentNode == null) throw new ArgumentNullException(nameof(currentNode));
-                if (currentNode.Left != null) {
-                    var internalEnumerator = EnumerateTreeInternal(currentNode.Left);
-                    while (internalEnumerator.MoveNext()) {
-                        yield return internalEnumerator.Current;
-                    }
-                }
-
-                yield return currentNode;
-                
-                if (currentNode.Right != null) {
-                    var internalEnumerator = EnumerateTreeInternal(currentNode.Right);
-                    while (internalEnumerator.MoveNext()) {
-                        yield return internalEnumerator.Current;
-                    }
-                } 
-            }
-
-            var enumerator = EnumerateTreeInternal(Root!);
+            var enumerator = TraverseTreeInternal();
             while (enumerator.MoveNext()) {
                 yield return enumerator.Current;
             }
         }
 
         public IEnumerator<TData> GetEnumerator() {
-            return TraverseTreeInternal();
+            return TraverseTreeDataInternal();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
