@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using Structures.NetSixZero.Pools;
+using System;
+using System.Threading;
 
 namespace Structures_UnitTests_NetSixZero.Pools {
     internal class AverageConsumptionPoolUnitTests {
