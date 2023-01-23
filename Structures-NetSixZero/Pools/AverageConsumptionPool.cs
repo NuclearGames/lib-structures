@@ -6,7 +6,6 @@ namespace Structures.NetSixZero.Pools {
     /// </summary>
     public class AverageConsumptionPool<T> : IDisposable {
         private const int SIZE_CONTROL_DEPTH_DEFAULT = 4;
-        private const int START_SIZE_DEFAULT = 1;
 
         /// <summary>
         /// Текущий размер пула.
@@ -22,6 +21,7 @@ namespace Structures.NetSixZero.Pools {
         private readonly Action<T>? _removeAction;
         private readonly Action<T>? _getAction;
         private readonly Action<T>? _releaseAction;
+        private readonly int _minSize;
 
         /// <summary>
         /// Индекс текущего цикла из <see cref="_sizeControl"/>.
@@ -56,11 +56,12 @@ namespace Structures.NetSixZero.Pools {
             _removeAction = settings.RemoveAction;
             _getAction = settings.GetAction;
             _releaseAction = settings.ReleaseAction;
+            _minSize = settings.MinSize;
 
             _container = new Queue<T>();
             _sizeControl = new List<int>(_sizeControlDepth);
 
-            Size = settings.StartSize ?? START_SIZE_DEFAULT;
+            Size = settings.StartSize ?? _minSize;
             _sizeControl.Add(Size);
         }
 
@@ -73,7 +74,7 @@ namespace Structures.NetSixZero.Pools {
 
             _currentSizeControlSum += _sizeControl[_currentCycleIndex];
 
-            Size = (int)Math.Ceiling(_currentSizeControlSum / (float)_sizeControl.Count);
+            Size = Math.Max((int)Math.Ceiling(_currentSizeControlSum / (float)_sizeControl.Count), _minSize);
 
             _currentSizeControlSum -= IncrementCycleIndex();
         }
@@ -153,6 +154,7 @@ namespace Structures.NetSixZero.Pools {
             public Action<T>? ReleaseAction { get; set; }
             public int? SizeControlDepth { get; set; }
             public int? StartSize { get; set; }
+            public int MinSize { get; set; }
         }
     }
 }

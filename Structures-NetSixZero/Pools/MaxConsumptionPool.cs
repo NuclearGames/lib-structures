@@ -1,12 +1,7 @@
-﻿using NuclearGames.StructuresUnity.Extensions;
-using System;
-using System.Collections.Generic;
+﻿using Structures.NetSixZero.Extensions;
 
-namespace NuclearGames.StructuresUnity.Pools {
-    /// <summary>
-    /// Пул, вычисляющий размер автоматически, как среднее из нескольких последних пиков потребления.
-    /// </summary>
-    public class AverageConsumptionPool<T> : IDisposable {
+namespace Structures.NetSixZero.Pools {
+    public class MaxConsumptionPool<T> : IDisposable {
         private const int SIZE_CONTROL_DEPTH_DEFAULT = 4;
 
         /// <summary>
@@ -35,12 +30,7 @@ namespace NuclearGames.StructuresUnity.Pools {
         /// </summary>
         private int _inUse;
 
-        /// <summary>
-        /// Сумма элементов <see cref="_sizeControl"/>.
-        /// </summary>
-        private int _currentSizeControlSum;
-
-        public AverageConsumptionPool(Settings settings) {
+        public MaxConsumptionPool(Settings settings) {
             if (settings.StartSize != null && settings.StartSize < 0) {
                 throw new ArgumentException($"{nameof(settings.StartSize)} has invalid value.");
             }
@@ -73,12 +63,11 @@ namespace NuclearGames.StructuresUnity.Pools {
         /// </summary>
         public void ResetCycle() {
             TryUpdateCurrentConsumption();
-
-            _currentSizeControlSum += _sizeControl[_currentCycleIndex];
-
-            Size = Math.Max((int)Math.Ceiling(_currentSizeControlSum / (float)_sizeControl.Count), _minSize);
-
-            _currentSizeControlSum -= IncrementCycleIndex();
+            int currentValue = _sizeControl[_currentCycleIndex];
+            int removeValue = IncrementCycleIndex();
+            if (removeValue == Size || currentValue > Size) {
+                UpdateSize();
+            }
         }
 
         /// <summary>
@@ -143,6 +132,16 @@ namespace NuclearGames.StructuresUnity.Pools {
             }
         }
 
+        private void UpdateSize() {
+            int max = _sizeControl[0];
+            for (int i = 1; i < _sizeControl.Count; i++) {
+                if (_sizeControl[i] > max) {
+                    max = _sizeControl[i];
+                }
+            }
+            Size = Math.Max(max, _minSize);
+        }
+
         public void Dispose() {
             while (_container.Count > 0) {
                 _removeAction?.Invoke(_container.Dequeue());
@@ -150,10 +149,10 @@ namespace NuclearGames.StructuresUnity.Pools {
         }
 
         public class Settings {
-            public Func<T> CreateFunction { get; set; }
-            public Action<T> RemoveAction { get; set; }
-            public Action<T>?GetAction { get; set; }
-            public Action<T> ReleaseAction { get; set; }
+            public Func<T>? CreateFunction { get; set; }
+            public Action<T>? RemoveAction { get; set; }
+            public Action<T>? GetAction { get; set; }
+            public Action<T>? ReleaseAction { get; set; }
             public int? SizeControlDepth { get; set; }
             public int? StartSize { get; set; }
             public int MinSize { get; set; }

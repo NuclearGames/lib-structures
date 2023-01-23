@@ -1,10 +1,9 @@
-﻿using NuclearGames.StructuresUnity.Pools;
-using NUnit.Framework;
-using System.Threading;
+﻿using NUnit.Framework;
+using Structures.NetSixZero.Pools;
 using System;
 
-namespace Tests.Editor.Pools {
-    internal class AverageConsumptionPoolUnitTests {
+namespace Structures_UnitTests_NetSixZero.Pools {
+    internal class MaxConsumptionPoolUnitTests {
         private class TestElement {
             public int Value { get; set; }
         }
@@ -23,7 +22,7 @@ namespace Tests.Editor.Pools {
                 element.Value = -1;
             }
 
-            var pool = new AverageConsumptionPool<TestElement>(new AverageConsumptionPool<TestElement>.Settings() {
+            var pool = new MaxConsumptionPool<TestElement>(new MaxConsumptionPool<TestElement>.Settings() {
                 CreateFunction = CreateElement,
                 RemoveAction = RemoveElement,
                 SizeControlDepth = 4,
@@ -56,7 +55,7 @@ namespace Tests.Editor.Pools {
                 element.Value = -1;
             }
 
-            var pool = new AverageConsumptionPool<TestElement>(new AverageConsumptionPool<TestElement>.Settings() {
+            var pool = new MaxConsumptionPool<TestElement>(new MaxConsumptionPool<TestElement>.Settings() {
                 CreateFunction = () => new TestElement() { Value = 1 },
                 GetAction = GetAction,
                 SizeControlDepth = 4,
@@ -76,7 +75,7 @@ namespace Tests.Editor.Pools {
                 element.Value = -1;
             }
 
-            var pool = new AverageConsumptionPool<TestElement>(new AverageConsumptionPool<TestElement>.Settings() {
+            var pool = new MaxConsumptionPool<TestElement>(new MaxConsumptionPool<TestElement>.Settings() {
                 CreateFunction = () => new TestElement() { Value = 1 },
                 ReleaseAction = ReleaseAction,
                 SizeControlDepth = 4,
@@ -96,7 +95,7 @@ namespace Tests.Editor.Pools {
         /// </summary>
         [Test]
         public void SizeTest() {
-            var pool = new AverageConsumptionPool<int>(new AverageConsumptionPool<int>.Settings() {
+            var pool = new MaxConsumptionPool<int>(new MaxConsumptionPool<int>.Settings() {
                 CreateFunction = () => 2,
                 SizeControlDepth = 3,
                 StartSize = 2,
@@ -107,7 +106,6 @@ namespace Tests.Editor.Pools {
             pool.Return(2);
             pool.ResetCycle();
 
-            // (2) / 1 = 2.
             Assert.AreEqual(2, pool.Size);
 
             pool.Get();
@@ -116,7 +114,6 @@ namespace Tests.Editor.Pools {
             pool.Return(2);
             pool.ResetCycle();
 
-            // (2 + 2) / 2 = 2.
             Assert.AreEqual(2, pool.Size);
 
             pool.Get();
@@ -127,36 +124,24 @@ namespace Tests.Editor.Pools {
             pool.Return(2);
             pool.ResetCycle();
 
-            // (4 + 2 + 2) / 3 = 3.
-            Assert.AreEqual(3, pool.Size);
-
-            pool.Get();
-            pool.Get();
-            pool.Get();
-            pool.Return(2);
-            pool.Return(2);
-            pool.Return(2);
-            pool.Return(2);
-            pool.Return(2);
-            pool.ResetCycle();
-
-            // (5 + 4 + 2) / 3 = 11/3 = 4.
             Assert.AreEqual(4, pool.Size);
 
-
+            pool.Get();
+            pool.Get();
+            pool.Get();
+            pool.Return(2);
+            pool.Return(2);
+            pool.Return(2);
+            pool.Return(2);
+            pool.Return(2);
             pool.ResetCycle();
 
-            // (0 + 5 + 4) / 3 = 3.
-            Assert.AreEqual(3, pool.Size);
+            Assert.AreEqual(5, pool.Size);
 
             pool.ResetCycle();
-
-            // (0 + 0 + 5) / 3 = 2.
-            Assert.AreEqual(2, pool.Size);
+            Assert.AreEqual(5, pool.Size);
 
             pool.ResetCycle();
-
-            // (0 + 0 + 0) / 3 = 0.
             Assert.AreEqual(1, pool.Size);
         }
     }

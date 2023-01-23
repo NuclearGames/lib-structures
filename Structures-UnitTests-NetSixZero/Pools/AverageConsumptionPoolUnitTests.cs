@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using Structures.NetSixZero.Pools;
+using System;
+using System.Threading;
 
 namespace Structures_UnitTests_NetSixZero.Pools {
     internal class AverageConsumptionPoolUnitTests {
@@ -97,7 +99,8 @@ namespace Structures_UnitTests_NetSixZero.Pools {
             var pool = new AverageConsumptionPool<int>(new AverageConsumptionPool<int>.Settings() {
                 CreateFunction = () => 2,
                 SizeControlDepth = 3,
-                StartSize = 2
+                StartSize = 2,
+                MinSize = 1
             });
 
             pool.Get();
@@ -145,6 +148,16 @@ namespace Structures_UnitTests_NetSixZero.Pools {
 
             // (0 + 5 + 4) / 3 = 3.
             Assert.AreEqual(3, pool.Size);
+
+            pool.ResetCycle();
+
+            // (0 + 0 + 5) / 3 = 2.
+            Assert.AreEqual(2, pool.Size);
+
+            pool.ResetCycle();
+
+            // (0 + 0 + 0) / 3 = 0.
+            Assert.AreEqual(1, pool.Size);
         }
     }
 }
