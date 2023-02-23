@@ -5,26 +5,34 @@ on:
 
 jobs:
   tests:
-
+    if: contains(github.head_ref, 'unity')
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - 2019.2.11f1
+        projectPath:
+          - Unity/Structrues-Unity
 
     steps:
       # Checkout
       - name: Checkout repository
-        uses: actions/checkout@v2
-        # with:
-          # lfs: true
+        uses: actions/checkout@v3
+        with:
+          lfs: true
           
       # Cache
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
-          path: Unity/Structrues-Unity/Library
-          # key: Library-${{ hashFiles('Unity/Structrues-Unity/Assets/**', 'Unity/Structrues-Unity/Packages/**', 'Unity/Structrues-Unity/ProjectSettings/**') }}
-          # key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/Assets/**/*.cs', 'Unity/Structrues-Unity/ProjectSettings/*.asset', 'Unity/Structrues-Unity/Packages/**/*.cs', 'Unity/Structrues-Unity/Packages/**/*.json') }}
-          key: Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/**/*.cs') }}
+          path: ${{ matrix.projectPath }}/Library # Unity/Structrues-Unity/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }} # Library-${{ runner.os }}-${{ hashFiles('Unity/Structrues-Unity/**/*.cs') }}
           restore-keys: |
-            Library-${{ runner.os }}-
+            Library-${{ matrix.projectPath }}-
+            Library-
+# Library-${{ runner.os }}-
           
       # Project Tests
       - name: Project Tests
@@ -33,5 +41,5 @@ jobs:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           testMode : 'editmode'
-          projectPath: Unity/Structrues-Unity
+          projectPath: ${{ matrix.projectPath }} # Unity/Structrues-Unity
           githubToken: ${{ secrets.GITHUB_TOKEN }}
