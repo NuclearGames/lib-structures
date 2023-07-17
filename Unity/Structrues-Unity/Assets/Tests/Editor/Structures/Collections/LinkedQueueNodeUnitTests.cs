@@ -17,6 +17,20 @@ namespace Tests.Editor.Structures.Collections {
             Assert.Null(linkedQueue.Last);
         }
 
+        [TestCase(3)]
+        public void PresizedConstructor(int size) {
+            var linkedQueue = new LinkedQueue<float>(size);
+            
+            Assert.AreEqual(size, linkedQueue.Count);
+
+            LinkedQueueNode<float>? currentNode = linkedQueue.First;
+            while (currentNode != null) {
+                Assert.AreEqual(default(float), currentNode.Value);
+                
+                currentNode = currentNode.Next;
+            }
+        }
+
         [Test]
         public void SingleElementConstructorTest() {
             var value = new Random().Next(0, 10000);
@@ -111,6 +125,34 @@ namespace Tests.Editor.Structures.Collections {
             Assert.AreEqual(false, linkedQueue.TryDequeue(out _));
         }
 
+        [TestCase(3)]
+        public void TryEnqueueWithDequeueTest(int size) {
+            var linkedQueue = new LinkedQueue<float>(size);
+
+            var index = 0f;
+            for (int i = 0; i < size; i++) {
+                index++;
+
+                var result = linkedQueue.TryEnqueueWithDequeue(in index, out float dequeuedValue);
+                
+                Assert.AreEqual(true, result);
+                Assert.AreEqual(size, linkedQueue.Count);
+                Assert.AreEqual(0, dequeuedValue);
+                Assert.AreEqual(index, linkedQueue.Last!.Value);
+            }
+            
+            for (int i = 0; i < size; i++) {
+                index++;
+
+                var result = linkedQueue.TryEnqueueWithDequeue(in index, out float dequeuedValue);
+                
+                Assert.AreEqual(true, result);
+                Assert.AreEqual(size, linkedQueue.Count);
+                Assert.AreEqual(index - size, dequeuedValue);
+                Assert.AreEqual(index, linkedQueue.Last!.Value);
+            }
+        }
+
         [TestCase(10)]
         [TestCase(100)]
         [TestCase(1000)]
@@ -181,6 +223,100 @@ namespace Tests.Editor.Structures.Collections {
             queue.TryDequeue(out _);
             queue.TryDequeue(out _);
             Assert.AreEqual(0, useNodesCounter);
+        }
+
+        [Test]
+        public void EmptyCollectionEnumeratorTests() {
+            const int size = 0;
+            var queue = new LinkedQueue<int>();
+
+            using var enumerator = LinkedQueue<int>.GetEnumerator(queue);
+            Assert.AreEqual(false, enumerator.MoveNext());
+        }
+        
+        [Test]
+        public void SingleElementCollectionEnumeratorTests() {
+            const int size = 1;
+            const int defaultValue = 1;
+            var queue = new LinkedQueue<int>(size, defaultValue);
+
+            using var enumerator = LinkedQueue<int>.GetEnumerator(queue);
+
+            for (int i = 0; i <= size; i++) {
+                bool expectedMoveNext = i < size;
+                Assert.AreEqual(expectedMoveNext, enumerator.MoveNext());
+
+                if (expectedMoveNext) {
+                    Assert.AreEqual(defaultValue, enumerator.Current);
+                } else {
+                    Assert.AreEqual(0, enumerator.Current);
+                }
+            }
+        }
+        
+        [TestCase(3)]
+        public void CollectionEnumeratorTests(int size) {
+            var queue = new LinkedQueue<int>(Enumerable.Range(1, size));
+
+            using var enumerator = LinkedQueue<int>.GetEnumerator(queue);
+
+            for (int i = 0; i <= size; i++) {
+                bool expectedMoveNext = i < size;
+                Assert.AreEqual(expectedMoveNext, enumerator.MoveNext());
+
+                if (expectedMoveNext) {
+                    Assert.AreEqual(i+1, enumerator.Current);
+                } else {
+                    Assert.AreEqual(0, enumerator.Current);
+                }
+            }
+        }
+        
+        [TestCase(3)]
+        public void EnumeratorResetTests(int size) {
+            var queue = new LinkedQueue<int>(Enumerable.Range(1, size));
+
+            using var enumerator = LinkedQueue<int>.GetEnumerator(queue);
+
+            for (int i = 0; i < size-1; i++) {
+                bool expectedMoveNext = i < size;
+                Assert.AreEqual(expectedMoveNext, enumerator.MoveNext());
+                Assert.AreEqual(i+1, enumerator.Current);
+            }
+            
+            enumerator.Reset();
+            
+            for (int i = 0; i <= size; i++) {
+                bool expectedMoveNext = i < size;
+                Assert.AreEqual(expectedMoveNext, enumerator.MoveNext());
+
+                if (expectedMoveNext) {
+                    Assert.AreEqual(i+1, enumerator.Current);
+                } else {
+                    Assert.AreEqual(0, enumerator.Current);
+                }
+            }
+        }
+        
+        [TestCase(3)]
+        public void ForeachEnumeratorTests(int size) {
+            var source = Enumerable.Range(1, size).ToArray();
+            var expectedSum = source.Sum();
+            
+            var queue = new LinkedQueue<int>(source);
+
+            var actualSum = 0f;
+            foreach (var element in queue) {
+                actualSum += element;
+            }
+            Assert.AreEqual(expectedSum, actualSum);
+            
+            actualSum = 0f;
+            foreach (var element in queue) {
+                actualSum += element;
+            }
+            Assert.AreEqual(expectedSum, actualSum);
+
         }
 
         private class GetReleaseNodeLinkedQueue<T> : LinkedQueue<T> {
