@@ -32,6 +32,12 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
             }
         }
 
+        public LinkedQueue(int capacity, T defaultValue = default) {
+            for (int i = 0; i < capacity; i++) {
+                Enqueue(defaultValue);
+            }
+        }
+
 #endregion
         
         /// <summary>
@@ -72,6 +78,34 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
             ReleaseNode(removeNode);
             return true;
         }
+        
+        /// <summary>
+        /// Пытается получить следующий элемент из очереди (с удалением из очереди) сразу вместе с добавлением нового элемнета в очередь
+        /// </summary>
+        /// <param name="newValue">Новое значение</param>
+        /// <param name="dequeuedValue">Значение, которое попытались достать</param>
+        /// <returns>TRUE - если удалось достать значение <paramref name="dequeuedValue"/></returns>
+        public bool TryEnqueueWithDequeue(in T newValue, out T dequeuedValue) {
+            dequeuedValue = default;
+            
+            if (Count == 0) {
+                Enqueue(newValue);
+                return false;
+            }
+
+            dequeuedValue = _head!.Value;
+            _head.Value = newValue;
+            if (Count == 1) {
+                return true;
+            }
+            
+            var currentNode = _head;
+            _head = currentNode.NextNode;
+            _tail!.NextNode = currentNode;
+            _tail = currentNode;
+
+            return true;
+        }
 
         protected virtual LinkedQueueNode<T> GetNode(T value) {
             return new LinkedQueueNode<T>(this, value);
@@ -103,17 +137,64 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
         
         
 #region Enumerable
+        
+        public struct Enumerator : IEnumerator<T> {
+            
+            /// <summary>
+            /// Current element
+            /// </summary>
+            object IEnumerator.Current => Current;
+            
+            /// <summary>
+            /// Current element
+            /// </summary>
+            public T Current { get; private set; }
+
+            
+            private readonly LinkedQueue<T> _source; 
+            private LinkedQueueNode<T> _currentNode;
+
+            public Enumerator(LinkedQueue<T> source) {
+                _source = source;
+                
+                _currentNode = _source.First;
+                Current = _currentNode != null ? _currentNode.Value : default;
+            }
+
+            /// <summary>
+            /// Try Move to next element
+            /// </summary>
+            /// <returns></returns>
+            /// <exception cref="NotImplementedException"></exception>
+            public bool MoveNext() {
+                if (_currentNode?.Next == null) {
+                    return false;
+                }
+                
+                _currentNode = _currentNode.NextNode;
+                Current = _currentNode.Value;
+                
+                return true;
+            }
+
+            public void Reset() {
+                _currentNode = _source.First;
+                Current = _currentNode != null ? _currentNode.Value : default;
+            }
+
+            public void Dispose() { }
+        }
 
         public IEnumerator<T> GetEnumerator() {
-            var node = _head;
-            while (node != null) {
-                yield return node.Value;
-                node = node.NextNode;
-            }
+            return new Enumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
             return GetEnumerator();
+        }
+        
+        public static Enumerator GetEnumerator(LinkedQueue<T> source) {
+            return new Enumerator(source);
         }
 
 #endregion
