@@ -152,13 +152,16 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
 
             
             private readonly LinkedQueue<T> _source; 
+            
+            private bool _started;
             private LinkedQueueNode<T> _currentNode;
 
             public Enumerator(LinkedQueue<T> source) {
                 _source = source;
-                
-                _currentNode = _source.First;
-                Current = _currentNode != null ? _currentNode.Value : default;
+
+                _started = false;
+                _currentNode = null;
+                Current = default;
             }
 
             /// <summary>
@@ -167,7 +170,18 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
             /// <returns></returns>
             /// <exception cref="NotImplementedException"></exception>
             public bool MoveNext() {
+                if (!_started) {
+                    _started = true;
+                    _currentNode = _source.First;
+                    
+                    bool result = _currentNode != null;
+                    Current = result ? _currentNode.Value : default;
+                    
+                    return result;
+                }
+                
                 if (_currentNode?.Next == null) {
+                    Current = default;
                     return false;
                 }
                 
@@ -178,8 +192,9 @@ namespace NuclearGames.StructuresUnity.Structures.Collections {
             }
 
             public void Reset() {
-                _currentNode = _source.First;
-                Current = _currentNode != null ? _currentNode.Value : default;
+                _started = false;
+                _currentNode = null;
+                Current = default;
             }
 
             public void Dispose() { }
