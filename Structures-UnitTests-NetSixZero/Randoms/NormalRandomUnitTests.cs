@@ -62,7 +62,7 @@ namespace Structures_UnitTests_NetSixZero.Randoms {
             IDictionary<int, double> buffer = new Dictionary<int, double>();
             
             for (int i = 0; i < totalCount; i++) {
-                var rating = _random.NextSingle();
+                var rating = _random.NextSingle(0, 5000);
                 var key = (int)(Math.Round(rating / step) * step);
                 if (buffer.TryGetValue(key, out var count)) {
                     count++;
