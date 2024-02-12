@@ -36,7 +36,7 @@ namespace Structures.NetSixZero.Randoms {
         /// Получить следующее вещественое значение
         /// </summary>
         public float NextSingle() {
-            return (float)Math.Round(_distributor.Next());
+            return NextSingle(0f, 1f);
         }
 
         /// <summary>
@@ -44,8 +44,10 @@ namespace Structures.NetSixZero.Randoms {
         /// </summary>
         public float NextSingle(float minValue, float maxValue, bool excludeLast = false) {
             maxValue = excludeLast ? maxValue : maxValue + APROXIMATE_DELTA;
+
+            float value = (float)_distributor.Next();
             
-            return Math.Clamp(NextSingle(), minValue, maxValue);
+            return Math.Clamp(value, minValue, maxValue);
         }
     }
 }
